@@ -1,7 +1,12 @@
+const { getTokenPrice } =
+require("../market/tokenPrice");
+
+
+
 class PortfolioEngine {
 
 
-    analyze(assets) {
+    async analyze(assets) {
 
 
         let totalValue = 0;
@@ -13,9 +18,16 @@ class PortfolioEngine {
         for(const asset of assets){
 
 
+            const market =
+                await getTokenPrice(
+                    asset.symbol
+                );
+
+
+
             const value =
                 asset.amount *
-                asset.price;
+                market.price;
 
 
 
@@ -25,16 +37,24 @@ class PortfolioEngine {
 
             holdings.push({
 
+
                 symbol:
                     asset.symbol,
 
+
                 amount:
                     asset.amount,
+
+
+                price:
+                    market.price,
+
 
                 value:
                     Number(
                         value.toFixed(2)
                     )
+
 
             });
 
@@ -43,11 +63,20 @@ class PortfolioEngine {
 
 
 
+
+        const largest =
+            holdings.sort(
+                (a,b)=>
+                b.value - a.value
+            )[0];
+
+
+
         let riskScore = 50;
 
 
 
-        if(assets.length >= 3){
+        if(holdings.length >= 3){
 
             riskScore -= 10;
 
@@ -60,13 +89,16 @@ class PortfolioEngine {
 
 
 
-        const concentration =
-            assets
-            .sort(
-                (a,b)=>
-                (b.amount*b.price) -
-                (a.amount*a.price)
-            )[0];
+        if(
+            largest.value /
+            totalValue
+            >
+            0.7
+        ){
+
+            riskScore += 15;
+
+        }
 
 
 
@@ -79,22 +111,20 @@ class PortfolioEngine {
                 ),
 
 
+
             holdings,
 
 
+
             concentrationRisk:
-                concentration.symbol,
+                largest.symbol,
+
 
 
             riskScore:
-
-
-                Math.max(
-                    0,
-                    Math.min(
-                        100,
-                        riskScore
-                    )
+                Math.min(
+                    100,
+                    riskScore
                 )
 
 
@@ -105,6 +135,7 @@ class PortfolioEngine {
 
 
 }
+
 
 
 module.exports = PortfolioEngine;

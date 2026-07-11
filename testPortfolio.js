@@ -7,24 +7,37 @@ new PortfolioEngine();
 
 
 
-const portfolio = [
-
-    {
-        symbol:"BTC",
-        amount:0.5,
-        price:64371
-    },
-
-    {
-        symbol:"ETH",
-        amount:3,
-        price:3500
-    }
-
-];
+async function test(){
 
 
+    const portfolio = [
 
-console.log(
-    engine.analyze(portfolio)
-);
+        {
+            symbol:"BTC",
+            amount:0.5
+        },
+
+        {
+            symbol:"ETH",
+            amount:3
+        }
+
+    ];
+
+
+
+    const result =
+        await engine.analyze(
+            portfolio
+        );
+
+
+
+    console.log(result);
+
+
+}
+
+
+
+test();
