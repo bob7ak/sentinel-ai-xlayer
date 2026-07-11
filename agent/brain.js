@@ -22,7 +22,7 @@ class SentinelAgent {
     constructor(){
 
         this.name = "Sentinel AI";
-        this.version = "0.4.0";
+        this.version = "0.5.0";
         this.model = "llama3";
 
 
@@ -39,6 +39,7 @@ class SentinelAgent {
             new RiskEngine();
 
     }
+
 
 
 
@@ -67,8 +68,9 @@ class SentinelAgent {
 
             const closes =
                 candles.map(
-                    c=>c.close
+                    c => c.close
                 );
+
 
 
 
@@ -112,6 +114,8 @@ class SentinelAgent {
 
 
 
+
+
             const risk =
                 this.risk.calculate(
                     indicators
@@ -119,19 +123,24 @@ class SentinelAgent {
 
 
 
+
+
             const prompt = `
 
-You are Sentinel AI.
+You are Sentinel AI, a professional crypto risk analyst.
 
-Analyze this crypto market.
+Analyze the following market data.
+
 
 Asset:
 ${market.asset}
 
-Price:
+
+Current Price:
 ${market.price}
 
-Indicators:
+
+Technical Indicators:
 
 SMA20:
 ${indicators.SMA20}
@@ -139,7 +148,7 @@ ${indicators.SMA20}
 EMA20:
 ${indicators.EMA20}
 
-RSI:
+RSI14:
 ${indicators.RSI14}
 
 MACD:
@@ -149,10 +158,14 @@ ATR:
 ${indicators.ATR}
 
 
+
+Risk Engine:
+
 Risk Score:
 ${risk.riskScore}/100
 
-Decision:
+
+Risk Level:
 ${risk.decision}
 
 
@@ -160,14 +173,27 @@ Factors:
 ${risk.factors.join(", ")}
 
 
-User request:
+
+User Request:
 
 ${input}
 
 
-Create a professional market report.
+
+Generate a concise professional crypto market report.
+
+Include:
+
+1. Market overview
+2. Technical analysis
+3. Risk explanation
+4. Investor considerations
+5. Final conclusion
+
 
 `;
+
+
 
 
 
@@ -175,6 +201,7 @@ Create a professional market report.
                 await this.client.chat({
 
                     model:this.model,
+
 
                     messages:[
 
@@ -189,27 +216,124 @@ Create a professional market report.
 
 
 
+
+
+
+
             return {
 
 
                 agent:this.name,
 
+
                 version:this.version,
+
 
                 status:"online",
 
 
-                market,
+
+                asset:
+                    market.asset,
 
 
-                indicators,
+
+                market:{
 
 
-                risk,
+                    price:
+                        market.price,
+
+
+                    volume24h:
+                        market.volume24h,
+
+
+                    status:
+                        market.marketStatus
+
+
+                },
+
+
+
+
+                technical:{
+
+
+                    sma20:
+                        indicators.SMA20,
+
+
+                    ema20:
+                        indicators.EMA20,
+
+
+                    rsi:
+                        indicators.RSI14,
+
+
+
+                    macd:{
+
+
+                        value:
+                            indicators.MACD.macd,
+
+
+                        signal:
+                            indicators.MACD.signal,
+
+
+                        histogram:
+                            indicators.MACD.histogram,
+
+
+
+                        trend:
+                            indicators.MACD.macd >
+                            indicators.MACD.signal
+                            ? "BULLISH"
+                            : "BEARISH"
+
+                    },
+
+
+
+                    atr:
+                        indicators.ATR
+
+
+                },
+
+
+
+
+
+                risk:{
+
+
+                    score:
+                        risk.riskScore,
+
+
+                    level:
+                        risk.decision,
+
+
+                    factors:
+                        risk.factors
+
+
+                },
+
+
+
 
 
                 analysis:
                     response.message.content
+
 
             };
 
@@ -221,11 +345,18 @@ Create a professional market report.
 
             return {
 
+
                 agent:this.name,
+
+
+                version:this.version,
+
 
                 status:"error",
 
+
                 error:error.message
+
 
             };
 
