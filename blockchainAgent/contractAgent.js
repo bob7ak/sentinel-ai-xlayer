@@ -11,6 +11,15 @@ class ContractAgent {
     constructor(){
 
 
+        if(!process.env.PRIVATE_KEY){
+
+            throw new Error(
+                "PRIVATE_KEY missing from environment"
+            );
+
+        }
+
+
         // X Layer Testnet RPC
         this.provider =
         new ethers.JsonRpcProvider(
@@ -27,9 +36,13 @@ class ContractAgent {
 
         this.contract =
         new ethers.Contract(
+
             config.address,
+
             config.abi,
+
             this.wallet
+
         );
 
 
@@ -38,10 +51,15 @@ class ContractAgent {
 
 
     async storeReport(
+
         asset,
+
         riskScore,
+
         decision,
+
         reportHash
+
     ){
 
 
@@ -62,17 +80,23 @@ class ContractAgent {
         await tx.wait();
 
 
+
         return {
 
             transaction:
+
             tx.hash,
 
+
             status:
+
             "stored on X Layer Testnet"
 
         };
 
+
     }
+
 
 
 
@@ -88,6 +112,7 @@ class ContractAgent {
         reports.find(
 
             item =>
+
             item.reportHash === reportHash
 
         );
@@ -102,11 +127,14 @@ class ContractAgent {
                 verified:false,
 
                 message:
+
                 "Report not found on X Layer"
 
             };
 
+
         }
+
 
 
 
@@ -120,29 +148,37 @@ class ContractAgent {
 
 
                 user:
+
                 report.user,
 
 
                 asset:
+
                 report.asset,
 
 
                 riskScore:
+
                 Number(report.riskScore),
 
 
                 decision:
+
                 report.decision,
 
 
                 timestamp:
+
                 Number(report.timestamp),
 
 
                 reportHash:
+
                 report.reportHash
 
+
             }
+
 
         };
 
