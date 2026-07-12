@@ -1,9 +1,21 @@
 {
   "network": "X Layer Testnet",
   "chainId": 1952,
-  "contractName": "SentinelReport",
-  "contractAddress": "0xdc5F05b1A631687C13Ff3dB693F126b4f378b467",
-  "deployer": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
   "rpc": "https://testrpc.xlayer.tech",
+
+  "deployer": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+
+  "contracts": {
+    "SentinelReport": {
+      "address": "0xdc5F05b1A631687C13Ff3dB693F126b4f378b467",
+      "purpose": "Stores Sentinel AI analysis proofs"
+    },
+
+    "SentinelAgentRegistry": {
+      "address": "0x321E3E8ef23B1Addc9409a8FFac8512B6404F934",
+      "purpose": "Registers Sentinel AI agents"
+    }
+  },
+
   "deploymentDate": "2026-07-12"
 }
