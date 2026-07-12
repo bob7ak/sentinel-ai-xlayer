@@ -155,6 +155,49 @@ app.post("/analyze", async (req, res) => {
 
 
 
+
+// Verify AI proof stored on blockchain
+
+app.get("/verify/:hash", async (req, res) => {
+
+    try {
+
+
+        const result =
+        await blockchain.verifyReport(
+
+            req.params.hash
+
+        );
+
+
+
+        res.json(result);
+
+
+
+    }
+    catch(error){
+
+
+        console.log(error);
+
+
+        res.status(500).json({
+
+            error:error.message
+
+        });
+
+
+    }
+
+});
+
+
+
+
+
 const PORT =
 process.env.PORT || 3000;
 

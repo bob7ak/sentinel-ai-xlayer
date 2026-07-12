@@ -2,8 +2,7 @@ require("dotenv").config();
 
 const { ethers } = require("ethers");
 
-const config =
-require("./contractConfig");
+const config = require("./contractConfig");
 
 
 class ContractAgent {
@@ -72,7 +71,83 @@ class ContractAgent {
     }
 
 
+
+    async verifyReport(reportHash){
+
+
+        const reports =
+        await this.contract.getReports();
+
+
+
+        const report =
+        reports.find(
+
+            item =>
+            item.reportHash === reportHash
+
+        );
+
+
+
+        if(!report){
+
+
+            return {
+
+                verified:false,
+
+                message:
+                "Report not found on blockchain"
+
+            };
+
+        }
+
+
+
+        return {
+
+
+            verified:true,
+
+
+            report:{
+
+
+                user:
+                report.user,
+
+
+                asset:
+                report.asset,
+
+
+                riskScore:
+                Number(report.riskScore),
+
+
+                decision:
+                report.decision,
+
+
+                timestamp:
+                Number(report.timestamp),
+
+
+                reportHash:
+                report.reportHash
+
+            }
+
+        };
+
+
+    }
+
+
 }
+
 
 
 module.exports = ContractAgent;
