@@ -1,7 +1,8 @@
 module.exports = {
 
+    // X Layer Testnet SentinelReport contract
     address:
-    "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "0xdc5F05b1A631687C13Ff3dB693F126b4f378b467",
 
 
     abi:[
@@ -51,6 +52,7 @@ module.exports = {
             "name":"getReports",
 
             "outputs":[
+
                 {
                     "components":[
 
@@ -98,6 +100,7 @@ module.exports = {
 
                     "type":"tuple[]"
                 }
+
             ],
 
             "stateMutability":"view",

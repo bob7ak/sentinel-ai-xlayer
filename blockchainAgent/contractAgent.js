@@ -10,9 +10,11 @@ class ContractAgent {
 
     constructor(){
 
+
+        // X Layer Testnet RPC
         this.provider =
         new ethers.JsonRpcProvider(
-            "http://127.0.0.1:8545"
+            "https://testrpc.xlayer.tech"
         );
 
 
@@ -30,6 +32,7 @@ class ContractAgent {
             this.wallet
         );
 
+
     }
 
 
@@ -40,6 +43,7 @@ class ContractAgent {
         decision,
         reportHash
     ){
+
 
         const tx =
         await this.contract.storeReport(
@@ -64,7 +68,7 @@ class ContractAgent {
             tx.hash,
 
             status:
-            "stored on blockchain"
+            "stored on X Layer Testnet"
 
         };
 
@@ -98,7 +102,7 @@ class ContractAgent {
                 verified:false,
 
                 message:
-                "Report not found on blockchain"
+                "Report not found on X Layer"
 
             };
 
