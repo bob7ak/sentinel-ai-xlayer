@@ -1,0 +1,49 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-a4f6c18628c06bec0a567e19456b6ba78a3fcc8a",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.9.1"
+  },
+  "userSourceNameMap": {
+    "contracts/SentinelAgentRegistry.sol": "project/contracts/SentinelAgentRegistry.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/SentinelAgentRegistry.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\n\r\npragma solidity ^0.8.20;\r\n\r\n\r\ncontract SentinelAgentRegistry {\r\n\r\n\r\n    struct Agent {\r\n\r\n        uint256 agentId;\r\n\r\n        address owner;\r\n\r\n        string name;\r\n\r\n        string[] capabilities;\r\n\r\n        uint256 createdAt;\r\n\r\n        uint256 reportsGenerated;\r\n\r\n        bool active;\r\n\r\n    }\r\n\r\n\r\n\r\n    uint256 public nextAgentId = 1;\r\n\r\n\r\n\r\n    mapping(uint256 => Agent) public agents;\r\n\r\n\r\n    mapping(address => uint256) public ownerAgent;\r\n\r\n\r\n\r\n    event AgentRegistered(\r\n\r\n        uint256 indexed agentId,\r\n\r\n        address indexed owner,\r\n\r\n        string name\r\n\r\n    );\r\n\r\n\r\n\r\n    event ReportCountUpdated(\r\n\r\n        uint256 indexed agentId,\r\n\r\n        uint256 totalReports\r\n\r\n    );\r\n\r\n\r\n\r\n\r\n    function registerAgent(\r\n\r\n        string memory name,\r\n\r\n        string[] memory capabilities\r\n\r\n    )\r\n\r\n    public\r\n\r\n    returns(uint256)\r\n\r\n    {\r\n\r\n\r\n        require(\r\n\r\n            ownerAgent[msg.sender] == 0,\r\n\r\n            \"Agent already exists\"\r\n\r\n        );\r\n\r\n\r\n\r\n        uint256 id = nextAgentId;\r\n\r\n\r\n        nextAgentId++;\r\n\r\n\r\n\r\n        agents[id] = Agent(\r\n\r\n            id,\r\n\r\n            msg.sender,\r\n\r\n            name,\r\n\r\n            capabilities,\r\n\r\n            block.timestamp,\r\n\r\n            0,\r\n\r\n            true\r\n\r\n        );\r\n\r\n\r\n\r\n        ownerAgent[msg.sender] = id;\r\n\r\n\r\n\r\n        emit AgentRegistered(\r\n\r\n            id,\r\n\r\n            msg.sender,\r\n\r\n            name\r\n\r\n        );\r\n\r\n\r\n\r\n        return id;\r\n\r\n\r\n    }\r\n\r\n\r\n\r\n\r\n    function incrementReports(\r\n\r\n        uint256 agentId\r\n\r\n    )\r\n\r\n    public\r\n\r\n    {\r\n\r\n\r\n        require(\r\n\r\n            agents[agentId].active,\r\n\r\n            \"Agent inactive\"\r\n\r\n        );\r\n\r\n\r\n\r\n        agents[agentId].reportsGenerated++;\r\n\r\n\r\n\r\n        emit ReportCountUpdated(\r\n\r\n            agentId,\r\n\r\n            agents[agentId].reportsGenerated\r\n\r\n        );\r\n\r\n\r\n    }\r\n\r\n\r\n\r\n\r\n    function getAgent(\r\n\r\n        uint256 agentId\r\n\r\n    )\r\n\r\n    public\r\n\r\n    view\r\n\r\n    returns(Agent memory)\r\n\r\n    {\r\n\r\n        return agents[agentId];\r\n\r\n    }\r\n\r\n\r\n}"
+      }
+    }
+  }
+}

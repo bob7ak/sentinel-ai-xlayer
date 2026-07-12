@@ -1,113 +1,132 @@
 module.exports = {
 
-    // X Layer Testnet SentinelReport contract
-    address:
-    "0xdc5F05b1A631687C13Ff3dB693F126b4f378b467",
+    network: {
+        name: "X Layer Testnet",
+        chainId: 1952,
+        rpc: "https://testrpc.xlayer.tech"
+    },
 
 
-    abi:[
+    contracts: {
 
-        {
-            "inputs":[
+        SentinelReport: {
 
-                {
-                    "internalType":"string",
-                    "name":"asset",
-                    "type":"string"
-                },
+            address:
+            "0xdc5F05b1A631687C13Ff3dB693F126b4f378b467",
 
-                {
-                    "internalType":"uint256",
-                    "name":"riskScore",
-                    "type":"uint256"
-                },
+
+            abi:[
 
                 {
-                    "internalType":"string",
-                    "name":"decision",
-                    "type":"string"
-                },
-
-                {
-                    "internalType":"string",
-                    "name":"reportHash",
-                    "type":"string"
-                }
-
-            ],
-
-            "name":"storeReport",
-
-            "outputs":[],
-
-            "stateMutability":"nonpayable",
-
-            "type":"function"
-        },
-
-
-        {
-            "inputs":[],
-
-            "name":"getReports",
-
-            "outputs":[
-
-                {
-                    "components":[
-
-                        {
-                            "internalType":"address",
-                            "name":"user",
-                            "type":"address"
-                        },
-
+                    "inputs":[
                         {
                             "internalType":"string",
                             "name":"asset",
                             "type":"string"
                         },
-
                         {
                             "internalType":"uint256",
                             "name":"riskScore",
                             "type":"uint256"
                         },
-
                         {
                             "internalType":"string",
                             "name":"decision",
                             "type":"string"
                         },
-
-                        {
-                            "internalType":"uint256",
-                            "name":"timestamp",
-                            "type":"uint256"
-                        },
-
                         {
                             "internalType":"string",
                             "name":"reportHash",
                             "type":"string"
                         }
+                    ],
+
+                    "name":"storeReport",
+
+                    "outputs":[],
+
+                    "stateMutability":"nonpayable",
+
+                    "type":"function"
+                },
+
+
+                {
+                    "inputs":[],
+
+                    "name":"getReports",
+
+                    "outputs":[
+
+                        {
+                            "components":[
+
+                                {
+                                    "internalType":"address",
+                                    "name":"user",
+                                    "type":"address"
+                                },
+
+                                {
+                                    "internalType":"string",
+                                    "name":"asset",
+                                    "type":"string"
+                                },
+
+                                {
+                                    "internalType":"uint256",
+                                    "name":"riskScore",
+                                    "type":"uint256"
+                                },
+
+                                {
+                                    "internalType":"string",
+                                    "name":"decision",
+                                    "type":"string"
+                                },
+
+                                {
+                                    "internalType":"uint256",
+                                    "name":"timestamp",
+                                    "type":"uint256"
+                                },
+
+                                {
+                                    "internalType":"string",
+                                    "name":"reportHash",
+                                    "type":"string"
+                                }
+
+                            ],
+
+                            "internalType":"struct SentinelReport.Report[]",
+
+                            "name":"",
+
+                            "type":"tuple[]"
+                        }
 
                     ],
 
-                    "internalType":"struct SentinelReport.Report[]",
+                    "stateMutability":"view",
 
-                    "name":"",
-
-                    "type":"tuple[]"
+                    "type":"function"
                 }
 
-            ],
+            ]
 
-            "stateMutability":"view",
+        },
 
-            "type":"function"
+
+        SentinelAgentRegistry: {
+
+            address:
+            "0x321E3E8ef23B1Addc9409a8FFac8512B6404F934",
+
+            abi: []
+
         }
 
-    ]
+    }
 
 };

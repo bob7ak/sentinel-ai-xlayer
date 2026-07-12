@@ -23,7 +23,7 @@ class ContractAgent {
         // X Layer Testnet RPC
         this.provider =
         new ethers.JsonRpcProvider(
-            "https://testrpc.xlayer.tech"
+            config.network.rpc
         );
 
 
@@ -37,9 +37,9 @@ class ContractAgent {
         this.contract =
         new ethers.Contract(
 
-            config.address,
+            config.contracts.SentinelReport.address,
 
-            config.abi,
+            config.contracts.SentinelReport.abi,
 
             this.wallet
 
@@ -47,6 +47,7 @@ class ContractAgent {
 
 
     }
+
 
 
 
@@ -100,11 +101,14 @@ class ContractAgent {
 
 
 
+
+
     async verifyReport(reportHash){
 
 
         const reports =
         await this.contract.getReports();
+
 
 
 
@@ -116,6 +120,7 @@ class ContractAgent {
             item.reportHash === reportHash
 
         );
+
 
 
 
@@ -134,6 +139,7 @@ class ContractAgent {
 
 
         }
+
 
 
 
@@ -184,6 +190,7 @@ class ContractAgent {
 
 
     }
+
 
 
 }
