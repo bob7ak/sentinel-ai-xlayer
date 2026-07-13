@@ -26,6 +26,10 @@ const registry = RegistryAgent;
 
 
 
+// =====================================
+// Basic Service Status
+// =====================================
+
 app.get("/", (req,res)=>{
 
     res.json({
@@ -36,11 +40,98 @@ app.get("/", (req,res)=>{
 
         agent:agent.name,
 
-        version:agent.version
+        version:agent.version,
+
+        network:"X Layer Testnet"
 
     });
 
 });
+
+
+
+
+
+// =====================================
+// OKX.AI ASP Health Endpoint
+// =====================================
+
+app.get("/health",(req,res)=>{
+
+    res.json({
+
+        service:"Sentinel AI",
+
+        status:"online",
+
+        type:"A2MCP",
+
+        network:"X Layer Testnet",
+
+        version:agent.version,
+
+        timestamp:new Date().toISOString()
+
+    });
+
+});
+
+
+
+
+
+// =====================================
+// OKX.AI ASP Service Description
+// =====================================
+
+app.get("/service",(req,res)=>{
+
+    res.json({
+
+        name:"Sentinel AI Risk Intelligence API",
+
+        type:"A2MCP",
+
+        description:
+        "Autonomous AI crypto risk analysis service providing market intelligence, technical indicators, explainable risk scoring, AI reports, and blockchain verified proofs.",
+
+
+        capabilities:[
+
+            "crypto-market-analysis",
+
+            "risk-scoring",
+
+            "technical-analysis",
+
+            "AI-report-generation",
+
+            "blockchain-proof-verification"
+
+        ],
+
+
+        network:"X Layer Testnet",
+
+        blockchainProof:true,
+
+
+        endpoints:{
+
+            analyze:"POST /analyze",
+
+            health:"GET /health",
+
+            service:"GET /service"
+
+        }
+
+
+    });
+
+});
+
+
 
 
 
@@ -121,9 +212,6 @@ app.post("/analyze", async(req,res)=>{
 
 
 
-        // Complete AI decision package
-        // stored inside SHA256 proof
-
         const reportData =
         JSON.stringify({
 
@@ -148,7 +236,6 @@ app.post("/analyze", async(req,res)=>{
 
 
             risk:{
-
 
                 score:
                 result.risk?.score,
@@ -200,7 +287,6 @@ app.post("/analyze", async(req,res)=>{
 
 
 
-
         const asset =
         result.asset ??
         result.market?.asset ??
@@ -228,7 +314,6 @@ app.post("/analyze", async(req,res)=>{
 
 
 
-
         const blockchainResult =
         await blockchain.storeReport(
 
@@ -248,8 +333,10 @@ app.post("/analyze", async(req,res)=>{
 
 
 
+
         const registryTransaction =
         await registry.incrementSentinelReports();
+
 
 
 
@@ -319,7 +406,6 @@ app.post("/analyze", async(req,res)=>{
 // Get All AI Proof Reports
 // =====================================
 
-
 app.get("/reports", async(req,res)=>{
 
 
@@ -379,7 +465,6 @@ app.get("/reports", async(req,res)=>{
 // Verify Blockchain Proof
 // =====================================
 
-
 app.get("/verify/:hash", async(req,res)=>{
 
 
@@ -416,6 +501,7 @@ app.get("/verify/:hash", async(req,res)=>{
 
 
 });
+
 
 
 
