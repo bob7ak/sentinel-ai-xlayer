@@ -15,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 
+
 const agent = new SentinelAgent();
 
 const blockchain = new ContractAgent();
@@ -38,6 +39,76 @@ app.get("/", (req, res) => {
     });
 
 });
+
+
+
+
+// ================================
+// On-chain AI Agent Identity
+// ================================
+
+app.get("/agent", async (req, res) => {
+
+    try {
+
+
+        const agentData =
+        await registry.getAgent(1);
+
+
+
+        res.json({
+
+            agentId:
+            Number(agentData.agentId),
+
+
+            owner:
+            agentData.owner,
+
+
+            name:
+            agentData.name,
+
+
+            capabilities:
+            agentData.capabilities,
+
+
+            createdAt:
+            Number(agentData.createdAt),
+
+
+            reportsGenerated:
+            Number(agentData.reportsGenerated),
+
+
+            active:
+            agentData.active
+
+        });
+
+
+    }
+    catch(error){
+
+
+        console.log(error);
+
+
+        res.status(500).json({
+
+            error:error.message
+
+        });
+
+
+    }
+
+});
+
+
+
 
 
 
@@ -99,7 +170,9 @@ app.post("/analyze", async (req, res) => {
 
 
 
+
         // Store AI report on SentinelReport contract
+
         const blockchainResult =
         await blockchain.storeReport(
 
@@ -115,9 +188,12 @@ app.post("/analyze", async (req, res) => {
 
 
 
+
         // Update Sentinel AI agent activity counter
+
         const registryTransaction =
         await registry.incrementSentinelReports();
+
 
 
 
@@ -128,9 +204,10 @@ app.post("/analyze", async (req, res) => {
 
             blockchain: {
 
-                stored: true,
+                stored:true,
 
                 reportHash,
+
 
                 transaction:
                 blockchainResult.transaction,
@@ -171,6 +248,7 @@ app.post("/analyze", async (req, res) => {
 
 
 
+
 // Verify AI proof stored on blockchain
 
 app.get("/verify/:hash", async (req, res) => {
@@ -184,7 +262,6 @@ app.get("/verify/:hash", async (req, res) => {
             req.params.hash
 
         );
-
 
 
         res.json(result);
@@ -208,6 +285,7 @@ app.get("/verify/:hash", async (req, res) => {
     }
 
 });
+
 
 
 

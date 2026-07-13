@@ -3,45 +3,80 @@ const API =
 
 
 
-// Check Sentinel AI status
 
-async function loadStatus(){
+// Load on-chain agent identity
+
+async function loadAgentIdentity(){
 
     try {
 
+
         const response =
-        await fetch(API);
+        await fetch(
+            `${API}/agent`
+        );
 
 
         const data =
         await response.json();
 
 
+
         document.getElementById(
-            "agentStatus"
+            "agentIdentity"
         ).innerText =
-        `
-        🟢 ${data.status}
+`
+Agent ID:
+${data.agentId}
 
-        Agent:
-        ${data.agent}
 
-        Version:
-        ${data.version}
-        `;
+Name:
+${data.name}
+
+
+Owner:
+${data.owner}
+
+
+Status:
+${data.active ? "ACTIVE" : "INACTIVE"}
+
+
+Capabilities:
+
+${data.capabilities
+.map(item => "✓ " + item)
+.join("\n")}
+
+
+Reports Generated:
+${data.reportsGenerated}
+
+
+Created At:
+${new Date(data.createdAt * 1000).toLocaleString()}
+`;
+
 
 
     }
     catch(error){
 
+
         document.getElementById(
-            "agentStatus"
+            "agentIdentity"
         ).innerText =
-        "🔴 Offline";
+        "Unable to load on-chain identity";
+
+
+        console.log(error);
+
 
     }
 
 }
+
+
 
 
 
@@ -69,8 +104,10 @@ async function analyze(){
                 method:"POST",
 
                 headers:{
+
                     "Content-Type":
                     "application/json"
+
                 },
 
 
@@ -92,10 +129,12 @@ async function analyze(){
 
 
 
+
         document.getElementById(
             "analysis"
         ).innerText =
         data.analysis;
+
 
 
 
@@ -106,10 +145,12 @@ async function analyze(){
 
 
 
+
         document.getElementById(
             "transaction"
         ).innerText =
         data.blockchain.transaction;
+
 
 
 
@@ -120,8 +161,13 @@ async function analyze(){
 
 
 
-    }
+        // refresh identity after new report
 
+        loadAgentIdentity();
+
+
+
+    }
     catch(error){
 
 
@@ -139,4 +185,6 @@ async function analyze(){
 
 
 
-loadStatus();
+// Start dashboard
+
+loadAgentIdentity();
