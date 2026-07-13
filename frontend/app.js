@@ -2,9 +2,22 @@ const API =
 "http://localhost:3000";
 
 
+const XLAYER_EXPLORER =
+"https://www.oklink.com/xlayer-test";
 
 
-// Load on-chain agent identity
+
+const SENTINEL_REPORT_CONTRACT =
+"0xdc5F05b1A631687C13Ff3dB693F126b4f378b467";
+
+
+const SENTINEL_AGENT_REGISTRY =
+"0x321E3E8ef23B1Addc9409a8FFac8512B6404F934";
+
+
+
+
+
 
 async function loadAgentIdentity(){
 
@@ -81,7 +94,8 @@ ${new Date(data.createdAt * 1000).toLocaleString()}
 
 
 
-// Run AI analysis
+
+
 
 async function analyze(){
 
@@ -146,22 +160,42 @@ async function analyze(){
 
 
 
-        document.getElementById(
-            "transaction"
-        ).innerText =
-        data.blockchain.transaction;
-
-
-
 
         document.getElementById(
-            "registry"
-        ).innerText =
-        data.blockchain.registryTransaction;
+            "transactionLink"
+        ).href =
+        `${XLAYER_EXPLORER}/tx/${data.blockchain.transaction}`;
 
 
 
-        // refresh identity after new report
+
+
+        document.getElementById(
+            "registryLink"
+        ).href =
+        `${XLAYER_EXPLORER}/tx/${data.blockchain.registryTransaction}`;
+
+
+
+
+
+        document.getElementById(
+            "reportContractLink"
+        ).href =
+        `${XLAYER_EXPLORER}/address/${SENTINEL_REPORT_CONTRACT}`;
+
+
+
+
+
+        document.getElementById(
+            "agentContractLink"
+        ).href =
+        `${XLAYER_EXPLORER}/address/${SENTINEL_AGENT_REGISTRY}`;
+
+
+
+
 
         loadAgentIdentity();
 
@@ -177,6 +211,9 @@ async function analyze(){
         error.message;
 
 
+        console.log(error);
+
+
     }
 
 
@@ -185,6 +222,23 @@ async function analyze(){
 
 
 
-// Start dashboard
+
+// Static contract links on page load
+
+document.getElementById(
+    "reportContractLink"
+).href =
+`${XLAYER_EXPLORER}/address/${SENTINEL_REPORT_CONTRACT}`;
+
+
+
+document.getElementById(
+    "agentContractLink"
+).href =
+`${XLAYER_EXPLORER}/address/${SENTINEL_AGENT_REGISTRY}`;
+
+
+
+
 
 loadAgentIdentity();
