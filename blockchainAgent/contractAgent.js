@@ -51,6 +51,7 @@ class ContractAgent {
 
 
 
+
     async storeReport(
 
         asset,
@@ -103,6 +104,59 @@ class ContractAgent {
 
 
 
+
+    async getReports(){
+
+
+        const reports =
+        await this.contract.getReports();
+
+
+
+        return reports.map(report => ({
+
+
+            user:
+
+            report.user,
+
+
+            asset:
+
+            report.asset,
+
+
+            riskScore:
+
+            Number(report.riskScore),
+
+
+            decision:
+
+            report.decision,
+
+
+            timestamp:
+
+            Number(report.timestamp),
+
+
+            reportHash:
+
+            report.reportHash
+
+
+        }));
+
+
+    }
+
+
+
+
+
+
+
     async verifyReport(reportHash){
 
 
@@ -139,6 +193,7 @@ class ContractAgent {
 
 
         }
+
 
 
 
