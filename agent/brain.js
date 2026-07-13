@@ -22,7 +22,7 @@ class SentinelAgent {
     constructor(){
 
         this.name = "Sentinel AI";
-        this.version = "0.5.0";
+        this.version = "0.6.0";
         this.model = "llama3";
 
 
@@ -127,10 +127,9 @@ class SentinelAgent {
 
             const prompt = `
 
-You are Sentinel AI, a professional crypto risk analyst.
+You are Sentinel AI, an autonomous Web3 crypto risk intelligence agent.
 
 Analyze the following market data.
-
 
 Asset:
 ${market.asset}
@@ -158,12 +157,10 @@ ATR:
 ${indicators.ATR}
 
 
-
 Risk Engine:
 
 Risk Score:
 ${risk.riskScore}/100
-
 
 Risk Level:
 ${risk.decision}
@@ -173,14 +170,12 @@ Factors:
 ${risk.factors.join(", ")}
 
 
-
 User Request:
 
 ${input}
 
 
-
-Generate a concise professional crypto market report.
+Generate a professional crypto risk report.
 
 Include:
 
@@ -189,7 +184,6 @@ Include:
 3. Risk explanation
 4. Investor considerations
 5. Final conclusion
-
 
 `;
 
@@ -201,7 +195,6 @@ Include:
                 await this.client.chat({
 
                     model:this.model,
-
 
                     messages:[
 
@@ -219,7 +212,6 @@ Include:
 
 
 
-
             return {
 
 
@@ -227,6 +219,9 @@ Include:
 
 
                 version:this.version,
+
+
+                model:this.model,
 
 
                 status:"online",
@@ -257,6 +252,33 @@ Include:
 
 
 
+                indicators:{
+
+
+                    SMA20:
+                        indicators.SMA20,
+
+
+                    EMA20:
+                        indicators.EMA20,
+
+
+                    RSI14:
+                        indicators.RSI14,
+
+
+                    MACD:
+                        indicators.MACD,
+
+
+                    ATR:
+                        indicators.ATR
+
+                },
+
+
+
+
 
                 technical:{
 
@@ -274,29 +296,42 @@ Include:
 
 
 
-                    macd:{
+                    macd:
+
+                        indicators.MACD
+                        ?
+                        {
+
+                            value:
+                                indicators.MACD.macd,
 
 
-                        value:
-                            indicators.MACD.macd,
+                            signal:
+                                indicators.MACD.signal,
 
 
-                        signal:
-                            indicators.MACD.signal,
+                            histogram:
+                                indicators.MACD.histogram,
 
 
-                        histogram:
-                            indicators.MACD.histogram,
+                            trend:
 
-
-
-                        trend:
                             indicators.MACD.macd >
                             indicators.MACD.signal
-                            ? "BULLISH"
-                            : "BEARISH"
 
-                    },
+                            ?
+
+                            "BULLISH"
+
+                            :
+
+                            "BEARISH"
+
+                        }
+
+                        :
+
+                        null,
 
 
 
@@ -333,6 +368,7 @@ Include:
 
                 analysis:
                     response.message.content
+
 
 
             };

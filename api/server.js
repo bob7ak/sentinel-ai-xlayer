@@ -24,17 +24,19 @@ const registry = RegistryAgent;
 
 
 
-app.get("/", (req, res) => {
+
+
+app.get("/", (req,res)=>{
 
     res.json({
 
-        project: "Sentinel AI X Layer",
+        project:"Sentinel AI X Layer",
 
-        status: "running",
+        status:"running",
 
-        agent: agent.name,
+        agent:agent.name,
 
-        version: agent.version
+        version:agent.version
 
     });
 
@@ -43,13 +45,15 @@ app.get("/", (req, res) => {
 
 
 
-// ================================
+
+
+// =====================================
 // On-chain AI Agent Identity
-// ================================
+// =====================================
 
-app.get("/agent", async (req, res) => {
+app.get("/agent", async(req,res)=>{
 
-    try {
+    try{
 
 
         const agentData =
@@ -59,32 +63,19 @@ app.get("/agent", async (req, res) => {
 
         res.json({
 
-            agentId:
-            Number(agentData.agentId),
+            agentId:Number(agentData.agentId),
 
+            owner:agentData.owner,
 
-            owner:
-            agentData.owner,
+            name:agentData.name,
 
+            capabilities:agentData.capabilities,
 
-            name:
-            agentData.name,
+            createdAt:Number(agentData.createdAt),
 
+            reportsGenerated:Number(agentData.reportsGenerated),
 
-            capabilities:
-            agentData.capabilities,
-
-
-            createdAt:
-            Number(agentData.createdAt),
-
-
-            reportsGenerated:
-            Number(agentData.reportsGenerated),
-
-
-            active:
-            agentData.active
+            active:agentData.active
 
         });
 
@@ -92,16 +83,13 @@ app.get("/agent", async (req, res) => {
     }
     catch(error){
 
-
         console.log(error);
-
 
         res.status(500).json({
 
             error:error.message
 
         });
-
 
     }
 
@@ -112,9 +100,17 @@ app.get("/agent", async (req, res) => {
 
 
 
-app.post("/analyze", async (req, res) => {
 
-    try {
+
+
+// =====================================
+// AI Analysis + Explainable AI Blockchain Proof
+// =====================================
+
+
+app.post("/analyze", async(req,res)=>{
+
+    try{
 
 
         const result =
@@ -124,20 +120,72 @@ app.post("/analyze", async (req, res) => {
 
 
 
+
+        // Complete AI decision package
+        // stored inside SHA256 proof
+
         const reportData =
         JSON.stringify({
 
-            market: result.market,
+            agent:
+            result.agent,
 
-            technical: result.technical,
 
-            indicators: result.indicators,
+            version:
+            result.version,
 
-            risk: result.risk,
 
-            analysis: result.analysis
+            asset:
+            result.asset,
+
+
+            market:
+            result.market,
+
+
+            technical:
+            result.technical,
+
+
+            risk:{
+
+
+                score:
+                result.risk?.score,
+
+
+                level:
+                result.risk?.level,
+
+
+                confidence:
+                result.risk?.confidence,
+
+
+                recommendation:
+                result.risk?.recommendation,
+
+
+                categories:
+                result.risk?.categories,
+
+
+                summary:
+                result.risk?.summary,
+
+
+                factors:
+                result.risk?.factors
+
+            },
+
+
+            analysis:
+            result.analysis
 
         });
+
+
 
 
 
@@ -149,6 +197,10 @@ app.post("/analyze", async (req, res) => {
 
 
 
+
+
+
+
         const asset =
         result.asset ??
         result.market?.asset ??
@@ -156,22 +208,26 @@ app.post("/analyze", async (req, res) => {
 
 
 
+
+
         const riskScore =
         result.risk?.score ??
-        result.risk?.riskScore ??
         0;
+
+
 
 
 
         const decision =
         result.risk?.level ??
-        result.risk?.decision ??
         "UNKNOWN";
 
 
 
 
-        // Store AI report on SentinelReport contract
+
+
+
 
         const blockchainResult =
         await blockchain.storeReport(
@@ -189,10 +245,14 @@ app.post("/analyze", async (req, res) => {
 
 
 
-        // Update Sentinel AI agent activity counter
+
+
 
         const registryTransaction =
         await registry.incrementSentinelReports();
+
+
+
 
 
 
@@ -202,9 +262,11 @@ app.post("/analyze", async (req, res) => {
             ...result,
 
 
-            blockchain: {
+            blockchain:{
+
 
                 stored:true,
+
 
                 reportHash,
 
@@ -218,6 +280,7 @@ app.post("/analyze", async (req, res) => {
 
                 status:
                 blockchainResult.status
+
 
             }
 
@@ -241,6 +304,7 @@ app.post("/analyze", async (req, res) => {
 
     }
 
+
 });
 
 
@@ -249,11 +313,77 @@ app.post("/analyze", async (req, res) => {
 
 
 
-// Verify AI proof stored on blockchain
 
-app.get("/verify/:hash", async (req, res) => {
 
-    try {
+// =====================================
+// Get All AI Proof Reports
+// =====================================
+
+
+app.get("/reports", async(req,res)=>{
+
+
+    try{
+
+
+        const reports =
+        await blockchain.getReports();
+
+
+
+
+        res.json({
+
+            agent:"Sentinel AI",
+
+            network:"X Layer Testnet",
+
+            totalReports:
+            reports.length,
+
+
+            reports
+
+        });
+
+
+
+    }
+    catch(error){
+
+
+        console.log(error);
+
+
+        res.status(500).json({
+
+            error:error.message
+
+        });
+
+
+    }
+
+
+});
+
+
+
+
+
+
+
+
+
+// =====================================
+// Verify Blockchain Proof
+// =====================================
+
+
+app.get("/verify/:hash", async(req,res)=>{
+
+
+    try{
 
 
         const result =
@@ -284,7 +414,9 @@ app.get("/verify/:hash", async (req, res) => {
 
     }
 
+
 });
+
 
 
 
@@ -297,10 +429,14 @@ process.env.PORT || 3000;
 
 
 
-app.listen(PORT, () => {
+app.listen(PORT,()=>{
+
 
     console.log(
+
         `Sentinel AI running on port ${PORT}`
+
     );
+
 
 });
