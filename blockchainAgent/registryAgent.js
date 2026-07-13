@@ -4,6 +4,9 @@ const { ethers } = require("ethers");
 const registryConfig = require("./registryConfig");
 
 
+const SENTINEL_AGENT_ID = 1;
+
+
 const provider = new ethers.JsonRpcProvider(
     "https://testrpc.xlayer.tech"
 );
@@ -77,10 +80,21 @@ async function incrementReports(agentId){
 
 
 
+async function incrementSentinelReports(){
+
+    return await incrementReports(
+        SENTINEL_AGENT_ID
+    );
+
+}
+
+
+
 module.exports = {
 
     registerAgent,
     getAgent,
-    incrementReports
+    incrementReports,
+    incrementSentinelReports
 
 };

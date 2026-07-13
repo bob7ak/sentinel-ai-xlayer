@@ -6,6 +6,7 @@ const crypto = require("crypto");
 
 const SentinelAgent = require("../agent/brain");
 const ContractAgent = require("../blockchainAgent/contractAgent");
+const RegistryAgent = require("../blockchainAgent/registryAgent");
 
 
 const app = express();
@@ -17,6 +18,8 @@ app.use(express.json());
 const agent = new SentinelAgent();
 
 const blockchain = new ContractAgent();
+
+const registry = RegistryAgent;
 
 
 
@@ -96,6 +99,7 @@ app.post("/analyze", async (req, res) => {
 
 
 
+        // Store AI report on SentinelReport contract
         const blockchainResult =
         await blockchain.storeReport(
 
@@ -108,6 +112,12 @@ app.post("/analyze", async (req, res) => {
             reportHash
 
         );
+
+
+
+        // Update Sentinel AI agent activity counter
+        const registryTransaction =
+        await registry.incrementSentinelReports();
 
 
 
@@ -124,6 +134,10 @@ app.post("/analyze", async (req, res) => {
 
                 transaction:
                 blockchainResult.transaction,
+
+
+                registryTransaction,
+
 
                 status:
                 blockchainResult.status
@@ -151,6 +165,7 @@ app.post("/analyze", async (req, res) => {
     }
 
 });
+
 
 
 
@@ -193,6 +208,7 @@ app.get("/verify/:hash", async (req, res) => {
     }
 
 });
+
 
 
 
