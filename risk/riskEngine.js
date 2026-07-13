@@ -8,38 +8,49 @@ class RiskEngine {
 
         let factors = [];
 
+        let categories = {
+
+            momentumRisk: 0,
+
+            trendRisk: 0,
+
+            volatilityRisk: 0,
+
+            marketRisk: 0
+
+        };
 
 
-        /*
-        RSI Analysis
-        */
 
-        if (indicators.RSI14 !== null) {
+        // RSI
+
+        if(indicators.RSI14 !== null){
 
 
-            if (indicators.RSI14 > 70) {
+            if(indicators.RSI14 > 70){
 
                 riskScore += 15;
 
+                categories.momentumRisk += 20;
+
                 factors.push(
-                    "RSI is overbought - correction risk increased"
+                    "RSI overbought - correction risk"
                 );
 
 
-            } else if (indicators.RSI14 < 30) {
+            }
+            else if(indicators.RSI14 < 30){
+
 
                 riskScore -= 10;
 
-                factors.push(
-                    "RSI is oversold - possible recovery zone"
-                );
+                categories.momentumRisk -= 10;
 
-
-            } else {
 
                 factors.push(
-                    "RSI is in normal momentum range"
+                    "RSI oversold - recovery opportunity"
                 );
+
 
             }
 
@@ -47,36 +58,39 @@ class RiskEngine {
 
 
 
-        /*
-        MACD Momentum
-        */
+        // MACD
 
-        if (indicators.MACD) {
+        if(indicators.MACD){
 
 
-            if (
+            if(
                 indicators.MACD.macd >
                 indicators.MACD.signal
-            ) {
-
+            ){
 
                 riskScore -= 10;
 
+                categories.momentumRisk -= 10;
+
 
                 factors.push(
-                    "MACD shows bullish momentum"
+                    "MACD bullish momentum"
                 );
 
 
-            } else {
+            }
+            else{
 
 
                 riskScore += 10;
 
+                categories.momentumRisk += 10;
+
 
                 factors.push(
-                    "MACD shows weakening momentum"
+                    "MACD weakening momentum"
                 );
+
 
             }
 
@@ -84,62 +98,70 @@ class RiskEngine {
 
 
 
-        /*
-        Trend Analysis
-        */
 
-        if (
+        // Trend
+
+        if(
             indicators.price >
             indicators.EMA20
-        ) {
+        ){
 
 
             riskScore -= 5;
 
+            categories.trendRisk -= 5;
+
 
             factors.push(
-                "Price above EMA20 - positive trend"
+                "Price above EMA20"
             );
 
 
-        } else {
+        }
+        else{
 
 
             riskScore += 10;
 
+            categories.trendRisk += 10;
+
 
             factors.push(
-                "Price below EMA20 - trend weakness"
+                "Price below EMA20"
             );
+
 
         }
 
 
 
-        /*
-        Volatility Analysis
-        */
 
-        if (indicators.ATR) {
+        // Volatility
+
+        if(indicators.ATR){
 
 
-            if (indicators.ATR > 500) {
+            if(indicators.ATR > 500){
 
 
                 riskScore += 15;
 
-
-                factors.push(
-                    "High volatility detected"
-                );
-
-
-            } else {
+                categories.volatilityRisk += 15;
 
 
                 factors.push(
-                    "Volatility is controlled"
+                    "High volatility"
                 );
+
+
+            }
+            else{
+
+
+                factors.push(
+                    "Volatility controlled"
+                );
+
 
             }
 
@@ -147,7 +169,7 @@ class RiskEngine {
 
 
 
-        // Keep score between 0-100
+
 
         riskScore = Math.max(
             0,
@@ -162,19 +184,59 @@ class RiskEngine {
         let decision;
 
 
-        if (riskScore < 35) {
+        if(riskScore < 35){
 
-            decision = "LOW RISK";
-
-        } else if (riskScore < 65) {
-
-            decision = "MODERATE RISK";
-
-        } else {
-
-            decision = "HIGH RISK";
+            decision="LOW RISK";
 
         }
+        else if(riskScore <65){
+
+            decision="MODERATE RISK";
+
+        }
+        else{
+
+            decision="HIGH RISK";
+
+        }
+
+
+
+
+        let recommendation;
+
+
+        if(riskScore >=65){
+
+            recommendation =
+            "REDUCE EXPOSURE";
+
+        }
+        else if(riskScore >=35){
+
+            recommendation =
+            "WAIT";
+
+        }
+        else{
+
+            recommendation =
+            "ACCUMULATE";
+
+        }
+
+
+
+
+        const confidence =
+        Math.min(
+            95,
+            60 +
+            Math.abs(
+                riskScore - 50
+            )
+        );
+
 
 
 
@@ -183,9 +245,25 @@ class RiskEngine {
 
             riskScore,
 
+
             decision,
 
-            factors
+
+            confidence,
+
+
+            recommendation,
+
+
+            categories,
+
+
+            factors,
+
+
+            summary:
+
+            `Market assessment shows ${decision}. ${recommendation} strategy recommended.`
 
 
         };
