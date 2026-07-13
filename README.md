@@ -2,35 +2,33 @@
 
 ## Autonomous Web3 Risk Intelligence Agent
 
-Sentinel AI is an autonomous Web3 AI agent that analyzes crypto market conditions, evaluates risk, generates intelligence reports, and stores verifiable AI proofs directly on X Layer Testnet.
+Sentinel AI is an autonomous Web3 AI agent built on **X Layer Testnet** that analyzes crypto markets, evaluates risk, generates explainable AI reports, and stores verifiable AI proofs directly on-chain.
 
 The project combines:
 
-* AI decision making
+* AI reasoning
 * Market intelligence
-* Risk scoring
+* Technical analysis
+* Explainable risk scoring
 * Blockchain verification
-* Autonomous agent identity
+* Autonomous AI agent identity
 
 ---
 
-# Problem
+# Vision
 
-Crypto markets move quickly, but users lack transparent AI systems that can explain decisions and provide verifiable proof of analysis.
+AI systems can generate powerful decisions, but users often cannot verify:
 
-Traditional AI analysis is centralized and cannot prove:
+* Who created the analysis
+* How the decision was generated
+* Whether the report was modified
+* When the intelligence was created
 
-* who generated the analysis
-* when it was created
-* whether the report was modified
+Sentinel AI solves this by combining AI analysis with blockchain verification.
 
 ---
 
-# Solution
-
-Sentinel AI creates a complete AI + blockchain intelligence pipeline.
-
-Flow:
+# Architecture
 
 ```
 User
@@ -39,44 +37,78 @@ Frontend Dashboard
  |
 Sentinel AI API
  |
-AI Analysis Engine
+AI Brain (Llama3)
  |
-Risk Engine
+Market Intelligence Engine
  |
-Blockchain Proof Storage
+Technical Indicators
  |
-X Layer
+Explainable Risk Engine
+ |
+SHA-256 Proof Generation
+ |
+X Layer Blockchain
  |
 Agent Registry
 ```
 
 ---
 
-# Features
+# Core Features
 
-## AI Market Intelligence
+## 1. AI Market Intelligence
 
-Sentinel AI provides:
+Sentinel AI analyzes live crypto market data using:
 
-* crypto market analysis
-* technical indicators
-* risk scoring
-* AI-generated reports
+* Price feeds
+* Candlestick data
+* Market volume
+* Technical indicators
 
-Supported analysis includes:
+Supported indicators:
 
-* price trends
-* RSI
-* EMA
-* SMA
+* SMA20
+* EMA20
+* RSI14
 * MACD
 * ATR
 
 ---
 
-## Autonomous Agent Identity
+# 2. Explainable AI Risk Intelligence Layer
 
-Sentinel AI is registered as an on-chain agent.
+Sentinel AI does not only produce predictions.
+
+It explains:
+
+* Why risk increased
+* Which indicators affected the decision
+* Market factors behind the recommendation
+
+Example output:
+
+```
+Risk Score: 60/100
+
+Risk Level:
+MODERATE RISK
+
+Factors:
+
+- RSI oversold condition detected
+- MACD momentum weakening
+- Price below EMA20
+- Volatility controlled
+
+Recommendation:
+WAIT
+```
+
+---
+
+# 3. Autonomous AI Agent Identity
+
+Sentinel AI is registered as an autonomous agent on X Layer.
 
 Agent:
 
@@ -91,32 +123,41 @@ Capabilities:
 - crypto-monitoring
 ```
 
-The identity is stored on X Layer through SentinelAgentRegistry.
+The identity is stored using:
+
+```
+SentinelAgentRegistry
+```
 
 ---
 
-## Blockchain Verified AI Reports
+# 4. Blockchain Verified AI Reports
 
-Every AI analysis generates:
+Every analysis creates:
 
-1. AI report
-2. SHA-256 proof hash
-3. Blockchain transaction
+1. AI generated report
+2. SHA-256 verification hash
+3. Blockchain transaction proof
 
 Pipeline:
 
 ```
-AI Report
-    |
-    |
-SHA-256 Hash
-    |
-    |
+AI Analysis
+
+      |
+
+Report Hash
+
+      |
+
 SentinelReport Contract
-    |
-    |
+
+      |
+
 X Layer Transaction
 ```
+
+Users can verify reports using the verification API.
 
 ---
 
@@ -134,17 +175,23 @@ RPC:
 https://testrpc.xlayer.tech
 ```
 
+Deployment date:
+
+```
+2026-07-12
+```
+
 ---
 
-## Smart Contracts
+# Smart Contracts
 
-### SentinelReport
+## SentinelReport
 
 Purpose:
 
 Stores Sentinel AI analysis proofs.
 
-Contract:
+Address:
 
 ```
 0xdc5F05b1A631687C13Ff3dB693F126b4f378b467
@@ -152,13 +199,13 @@ Contract:
 
 ---
 
-### SentinelAgentRegistry
+## SentinelAgentRegistry
 
 Purpose:
 
 Registers autonomous AI agents and tracks activity.
 
-Contract:
+Address:
 
 ```
 0x321E3E8ef23B1Addc9409a8FFac8512B6404F934
@@ -166,47 +213,64 @@ Contract:
 
 ---
 
-# Architecture
+# API
+
+## Agent Identity
 
 ```
-                 User
-                  |
-                  v
+GET /agent
+```
 
-          Web Dashboard
-                  |
-                  v
+Returns:
 
-             API Server
-                  |
-        --------------------
-        |                  |
-        v                  v
+* Agent ID
+* Owner
+* Capabilities
+* Activity status
 
- Sentinel AI Brain     Risk Engine
+---
 
-        |
-        v
-
-  AI Generated Report
-
-        |
-        v
-
- SHA-256 Verification Hash
-
-        |
-        v
-
-      X Layer
-
-   -----------------
-
-   SentinelReport
-
-   SentinelAgentRegistry
+## AI Analysis
 
 ```
+POST /analyze
+```
+
+Example:
+
+```
+{
+ "request":"Analyze BTC risk"
+}
+```
+
+Returns:
+
+* Market analysis
+* Technical indicators
+* Risk score
+* AI explanation
+* Blockchain proof
+
+---
+
+## Blockchain Reports
+
+```
+GET /reports
+```
+
+Returns stored AI proofs from X Layer.
+
+---
+
+## Verify AI Proof
+
+```
+GET /verify/:hash
+```
+
+Confirms whether an AI report exists on-chain.
 
 ---
 
@@ -216,10 +280,23 @@ The Sentinel AI dashboard displays:
 
 * On-chain agent identity
 * Agent capabilities
-* AI market reports
+* Market analysis
+* AI generated reports
 * Risk scores
 * Blockchain proofs
 * X Layer transactions
+
+Screenshots included:
+
+```
+screenshots/
+
+01-agent-identity.png
+
+02-ai-analysis.png
+
+03-blockchain-proof.png
+```
 
 ---
 
@@ -237,7 +314,7 @@ Install dependencies:
 npm install
 ```
 
-Create environment file:
+Create:
 
 ```
 .env
@@ -249,7 +326,7 @@ Add:
 PRIVATE_KEY=your_wallet_private_key
 ```
 
-Run API:
+Run:
 
 ```
 node api/server.js
@@ -265,17 +342,21 @@ frontend/index.html
 
 # Demo Flow
 
-1. Open Sentinel AI dashboard
+1. Launch Sentinel AI dashboard
 
-2. View on-chain agent identity
+2. Verify autonomous agent identity
 
-3. Run BTC market analysis
+3. Request BTC market analysis
 
-4. Generate AI risk report
+4. AI analyzes market conditions
 
-5. Verify blockchain transaction
+5. Risk Engine generates explanation
 
-6. Confirm proof stored on X Layer
+6. Report hash is created
+
+7. Proof is stored on X Layer
+
+8. Transaction can be verified
 
 ---
 
@@ -287,28 +368,37 @@ Deployer:
 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
 ```
 
-Deployment Date:
+Network:
 
 ```
-2026-07-12
+X Layer Testnet
 ```
 
 ---
 
 # Future Roadmap
 
-Future improvements:
+Planned improvements:
 
-* Multi-chain agent deployment
-* More market data sources
+* Multi-chain AI agents
 * Autonomous portfolio management
 * Agent-to-agent communication
-* DAO governed AI agents
+* More market data sources
+* DAO governed AI intelligence
+* AI agent marketplace integration
 
 ---
 
-# Built for
+# Built For
 
-OKX X Layer Build X Series
+## OKX X Layer Build X Series
 
-Sentinel AI demonstrates how autonomous AI agents can create transparent, verifiable, and blockchain-native intelligence.
+Sentinel AI demonstrates how autonomous AI agents can create:
+
+* Transparent intelligence
+* Explainable decisions
+* Verifiable blockchain proofs
+* Native Web3 AI infrastructure
+
+```
+```
