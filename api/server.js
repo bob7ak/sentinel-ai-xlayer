@@ -8,6 +8,8 @@ const SentinelAgent = require("../agent/brain");
 const ContractAgent = require("../blockchainAgent/contractAgent");
 const RegistryAgent = require("../blockchainAgent/registryAgent");
 
+const jobManager = require("../services/jobManager");
+
 
 const app = express();
 
@@ -52,6 +54,7 @@ app.get("/", (req,res)=>{
 
 
 
+
 // =====================================
 // OKX.AI ASP Health Endpoint
 // =====================================
@@ -75,6 +78,7 @@ app.get("/health",(req,res)=>{
     });
 
 });
+
 
 
 
@@ -120,6 +124,8 @@ app.get("/service",(req,res)=>{
 
             analyze:"POST /analyze",
 
+            result:"GET /result/:jobId",
+
             health:"GET /health",
 
             service:"GET /service"
@@ -130,7 +136,6 @@ app.get("/service",(req,res)=>{
     });
 
 });
-
 
 
 
@@ -195,11 +200,38 @@ app.get("/agent", async(req,res)=>{
 
 
 // =====================================
-// AI Analysis + Explainable AI Blockchain Proof
+// A2MCP Async AI Analysis Endpoint
 // =====================================
 
-
 app.post("/analyze", async(req,res)=>{
+
+
+    const jobId =
+    jobManager.createJob();
+
+
+
+    // Immediate marketplace response
+
+    res.json({
+
+        jobId,
+
+        status:"processing",
+
+        message:
+        "Sentinel AI analysis started",
+
+        resultEndpoint:
+        `/result/${jobId}`
+
+    });
+
+
+
+
+
+    // Background processing
 
     try{
 
@@ -208,6 +240,7 @@ app.post("/analyze", async(req,res)=>{
         await agent.analyze(
             req.body.request
         );
+
 
 
 
@@ -235,42 +268,15 @@ app.post("/analyze", async(req,res)=>{
             result.technical,
 
 
-            risk:{
-
-                score:
-                result.risk?.score,
-
-
-                level:
-                result.risk?.level,
-
-
-                confidence:
-                result.risk?.confidence,
-
-
-                recommendation:
-                result.risk?.recommendation,
-
-
-                categories:
-                result.risk?.categories,
-
-
-                summary:
-                result.risk?.summary,
-
-
-                factors:
-                result.risk?.factors
-
-            },
+            risk:
+            result.risk,
 
 
             analysis:
             result.analysis
 
         });
+
 
 
 
@@ -289,8 +295,8 @@ app.post("/analyze", async(req,res)=>{
 
         const asset =
         result.asset ??
-        result.market?.asset ??
         "BTC-USDT";
+
 
 
 
@@ -299,6 +305,7 @@ app.post("/analyze", async(req,res)=>{
         const riskScore =
         result.risk?.score ??
         0;
+
 
 
 
@@ -332,8 +339,6 @@ app.post("/analyze", async(req,res)=>{
 
 
 
-
-
         const registryTransaction =
         await registry.incrementSentinelReports();
 
@@ -344,34 +349,42 @@ app.post("/analyze", async(req,res)=>{
 
 
 
-        res.json({
+        jobManager.updateJob(
 
-            ...result,
+            jobId,
 
-
-            blockchain:{
-
-
-                stored:true,
+            {
 
 
-                reportHash,
+                ...result,
 
 
-                transaction:
-                blockchainResult.transaction,
+                blockchain:{
 
 
-                registryTransaction,
+                    stored:true,
 
 
-                status:
-                blockchainResult.status
+                    reportHash,
+
+
+                    transaction:
+                    blockchainResult.transaction,
+
+
+                    registryTransaction,
+
+
+                    status:
+                    blockchainResult.status
+
+
+                }
 
 
             }
 
-        });
+        );
 
 
 
@@ -379,17 +392,63 @@ app.post("/analyze", async(req,res)=>{
     catch(error){
 
 
-        console.log(error);
+        jobManager.updateJob(
+
+            jobId,
+
+            {
+
+                error:error.message
+
+            }
+
+        );
 
 
-        res.status(500).json({
+    }
 
-            error:error.message
+
+
+});
+
+
+
+
+
+
+
+
+
+// =====================================
+// Get Async Result
+// =====================================
+
+app.get("/result/:jobId",(req,res)=>{
+
+
+    const job =
+    jobManager.getJob(
+        req.params.jobId
+    );
+
+
+
+    if(!job){
+
+
+        return res.status(404).json({
+
+            error:"Job not found"
 
         });
 
 
     }
+
+
+
+    res.json(job);
+
 
 
 });
