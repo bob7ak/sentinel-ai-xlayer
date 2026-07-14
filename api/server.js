@@ -128,7 +128,11 @@ app.get("/service",(req,res)=>{
 
             health:"GET /health",
 
-            service:"GET /service"
+            service:"GET /service",
+
+            mcpInfo:"GET /mcp/info",
+
+            mcpTools:"GET /mcp/tools"
 
         }
 
@@ -136,6 +140,144 @@ app.get("/service",(req,res)=>{
     });
 
 });
+
+
+
+
+
+
+
+// =====================================
+// A2MCP Discovery Information
+// =====================================
+
+app.get("/mcp/info",(req,res)=>{
+
+    res.json({
+
+        name:"Sentinel AI Risk Intelligence",
+
+        type:"A2MCP",
+
+        version:"1.0.0",
+
+        description:
+        "Autonomous crypto risk analysis agent with AI reasoning and blockchain verified proofs.",
+
+        network:"X Layer Testnet",
+
+        status:"online",
+
+        capabilities:[
+
+            "crypto-market-analysis",
+
+            "risk-scoring",
+
+            "technical-analysis",
+
+            "AI-report-generation",
+
+            "blockchain-proof-verification"
+
+        ]
+
+    });
+
+});
+
+
+
+
+
+
+
+
+
+// =====================================
+// A2MCP Tools Discovery Layer
+// =====================================
+
+app.get("/mcp/tools",(req,res)=>{
+
+    res.json({
+
+        agent:"Sentinel AI Risk Intelligence",
+
+        type:"A2MCP",
+
+        version:"1.0.0",
+
+        tools:[
+
+
+            {
+
+                name:"analyze_crypto_risk",
+
+                description:
+                "Analyze cryptocurrency market risk using AI reasoning, technical indicators and blockchain verified proof storage.",
+
+                method:"POST",
+
+                endpoint:"/analyze",
+
+                inputSchema:{
+
+                    request:"string"
+
+                }
+
+            },
+
+
+            {
+
+                name:"get_analysis_result",
+
+                description:
+                "Retrieve asynchronous Sentinel AI analysis job results.",
+
+                method:"GET",
+
+                endpoint:"/result/:jobId",
+
+                inputSchema:{
+
+                    jobId:"string"
+
+                }
+
+            },
+
+
+            {
+
+                name:"verify_blockchain_proof",
+
+                description:
+                "Verify an AI-generated risk report stored on X Layer Testnet.",
+
+                method:"GET",
+
+                endpoint:"/verify/:hash",
+
+                inputSchema:{
+
+                    hash:"string"
+
+                }
+
+            }
+
+
+        ]
+
+    });
+
+});
+
+
 
 
 
@@ -211,8 +353,6 @@ app.post("/analyze", async(req,res)=>{
 
 
 
-    // Immediate marketplace response
-
     res.json({
 
         jobId,
@@ -230,8 +370,6 @@ app.post("/analyze", async(req,res)=>{
 
 
 
-
-    // Background processing
 
     try{
 
@@ -251,26 +389,20 @@ app.post("/analyze", async(req,res)=>{
             agent:
             result.agent,
 
-
             version:
             result.version,
-
 
             asset:
             result.asset,
 
-
             market:
             result.market,
-
 
             technical:
             result.technical,
 
-
             risk:
             result.risk,
-
 
             analysis:
             result.analysis
@@ -355,32 +487,23 @@ app.post("/analyze", async(req,res)=>{
 
             {
 
-
                 ...result,
-
 
                 blockchain:{
 
-
                     stored:true,
 
-
                     reportHash,
-
 
                     transaction:
                     blockchainResult.transaction,
 
-
                     registryTransaction,
-
 
                     status:
                     blockchainResult.status
 
-
                 }
-
 
             }
 
