@@ -9,6 +9,7 @@ const ContractAgent = require("../blockchainAgent/contractAgent");
 const RegistryAgent = require("../blockchainAgent/registryAgent");
 
 const jobManager = require("../services/jobManager");
+const identityManager = require("../services/identityManager");
 
 
 const app = express();
@@ -23,6 +24,8 @@ const agent = new SentinelAgent();
 const blockchain = new ContractAgent();
 
 const registry = RegistryAgent;
+
+
 
 
 
@@ -71,6 +74,7 @@ function mcpError(res, tool, error, code=500){
 
 
 
+
 // =====================================
 // Real MCP Tool Registry
 // Milestone 25.5
@@ -105,6 +109,7 @@ const toolRegistry = {
             agent.analyze(
 
                 args.request ||
+
                 "Analyze crypto risk"
 
             )
@@ -127,18 +132,21 @@ const toolRegistry = {
 
                 const asset =
                 result.asset ??
+
                 "BTC-USDT";
 
 
 
                 const riskScore =
                 result.risk?.score ??
+
                 0;
 
 
 
                 const decision =
                 result.risk?.level ??
+
                 "UNKNOWN";
 
 
@@ -203,6 +211,7 @@ const toolRegistry = {
 
             })
 
+
             .catch(error=>{
 
 
@@ -233,6 +242,7 @@ const toolRegistry = {
 
 
                 resultEndpoint:
+
                 `/result/${jobId}`
 
 
@@ -248,10 +258,13 @@ const toolRegistry = {
 
 
 
+
+
     get_analysis_result:{
 
 
         description:
+
         "Retrieve asynchronous Sentinel AI analysis job results.",
 
 
@@ -268,6 +281,7 @@ const toolRegistry = {
 
 
             const job =
+
             jobManager.getJob(
 
                 args.jobId
@@ -279,7 +293,9 @@ const toolRegistry = {
             if(!job){
 
                 throw new Error(
+
                     "Job not found"
+
                 );
 
             }
@@ -298,10 +314,13 @@ const toolRegistry = {
 
 
 
+
+
     verify_blockchain_proof:{
 
 
         description:
+
         "Verify an AI-generated risk report stored on X Layer Testnet.",
 
 
@@ -335,6 +354,9 @@ const toolRegistry = {
 
 
 
+
+
+
 // =====================================
 // Basic Service Status
 // =====================================
@@ -360,6 +382,8 @@ app.get("/",(req,res)=>{
 
 
 });
+
+
 
 
 
@@ -395,6 +419,8 @@ app.get("/health",(req,res)=>{
 
 
 
+
+
 // =====================================
 // Service Description
 // =====================================
@@ -411,6 +437,7 @@ app.get("/service",(req,res)=>{
 
 
         description:
+
         "Autonomous crypto risk analysis service with AI reasoning, technical indicators and blockchain verified proofs.",
 
 
@@ -439,6 +466,8 @@ app.get("/service",(req,res)=>{
 
             result:"GET /result/:jobId",
 
+            identity:"GET /identity",
+
             mcpInfo:"GET /mcp/info",
 
             mcpTools:"GET /mcp/tools",
@@ -452,7 +481,17 @@ app.get("/service",(req,res)=>{
     });
 
 
-});// =====================================
+});
+
+
+
+
+
+
+// ===============================
+// PART 1 END
+// CONTINUE PART 2 BELOW
+// ===============================// =====================================
 // A2MCP Discovery Information
 // =====================================
 
@@ -492,13 +531,71 @@ app.get("/mcp/info",(req,res)=>{
             "blockchain-proof-verification"
 
 
-        ]
+        ],
+
+
+        identityEndpoint:"/identity"
 
 
     });
 
 
 });
+
+
+
+
+
+
+
+// =====================================
+// Identity Endpoint
+// Milestone 26.1
+// =====================================
+
+app.get("/identity",(req,res)=>{
+
+
+    try{
+
+
+        res.json({
+
+
+            success:true,
+
+
+            identity:
+            identityManager.getIdentity()
+
+
+
+        });
+
+
+    }
+
+
+    catch(error){
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+            error:error.message
+
+
+        });
+
+
+    }
+
+
+});
+
+
 
 
 
@@ -558,9 +655,10 @@ app.get("/mcp/tools",(req,res)=>{
 
 
 
+
 // =====================================
 // MCP Tool Execution Router
-// Milestone 25.4 + 25.5
+// Milestone 25.4 + 25.5 + 26.2
 // =====================================
 
 app.post("/mcp/call",async(req,res)=>{
@@ -568,7 +666,9 @@ app.post("/mcp/call",async(req,res)=>{
 
     const {
 
+
         tool,
+
 
         arguments:args={}
 
@@ -577,7 +677,50 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
+
     try{
+
+
+
+        // =============================
+        // API KEY VERIFICATION
+        // Milestone 26.2
+        // =============================
+
+
+        const apiKey =
+        req.headers["x-api-key"];
+
+
+
+
+        if(
+            !identityManager.verifyApiKey(apiKey)
+        ){
+
+
+            return mcpError(
+
+                res,
+
+                tool || null,
+
+                "Invalid API key",
+
+                401
+
+            );
+
+
+        }
+
+
+
+
+
+        // =============================
+        // TOOL NAME CHECK
+        // =============================
 
 
         if(!tool){
@@ -600,8 +743,49 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
+
+
+
+        // =============================
+        // PERMISSION CHECK
+        // Milestone 26.2
+        // =============================
+
+
+        if(
+            !identityManager.hasPermission(tool)
+        ){
+
+
+            return mcpError(
+
+                res,
+
+                tool,
+
+                "Permission denied",
+
+                403
+
+            );
+
+
+        }
+
+
+
+
+
+
+        // =============================
+        // TOOL LOOKUP
+        // =============================
+
+
         const selectedTool =
         toolRegistry[tool];
+
+
 
 
 
@@ -625,8 +809,17 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
+
+
+
+        // =============================
+        // EXECUTE TOOL
+        // =============================
+
+
         const result =
         await selectedTool.execute(args);
+
 
 
 
@@ -639,6 +832,7 @@ app.post("/mcp/call",async(req,res)=>{
             result
 
         );
+
 
 
 
@@ -669,10 +863,10 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
-
-
-
-// =====================================
+// ===============================
+// PART 2 END
+// CONTINUE PART 3 BELOW
+// ===============================// =====================================
 // On-chain AI Agent Identity
 // =====================================
 
@@ -692,15 +886,21 @@ app.get("/agent",async(req,res)=>{
 
             agentId:Number(agentData.agentId),
 
+
             owner:agentData.owner,
+
 
             name:agentData.name,
 
+
             capabilities:agentData.capabilities,
+
 
             createdAt:Number(agentData.createdAt),
 
+
             reportsGenerated:Number(agentData.reportsGenerated),
+
 
             active:agentData.active
 
@@ -710,6 +910,7 @@ app.get("/agent",async(req,res)=>{
 
 
     }
+
 
     catch(error){
 
@@ -771,6 +972,7 @@ app.post("/analyze",async(req,res)=>{
 
 
 
+
     try{
 
 
@@ -783,8 +985,12 @@ app.post("/analyze",async(req,res)=>{
 
 
 
+
+
         const reportData =
         JSON.stringify(result);
+
+
 
 
 
@@ -799,9 +1005,13 @@ app.post("/analyze",async(req,res)=>{
 
 
 
+
+
         jobManager.updateJob(
 
+
             jobId,
+
 
             {
 
@@ -810,6 +1020,7 @@ app.post("/analyze",async(req,res)=>{
 
 
                 blockchainProof:
+
                 reportHash
 
 
@@ -823,12 +1034,15 @@ app.post("/analyze",async(req,res)=>{
     }
 
 
+
     catch(error){
 
 
         jobManager.updateJob(
 
+
             jobId,
+
 
             {
 
@@ -845,7 +1059,10 @@ app.post("/analyze",async(req,res)=>{
     }
 
 
+
 });
+
+
 
 
 
@@ -863,11 +1080,14 @@ app.get("/result/:jobId",(req,res)=>{
 
 
     const job =
+
     jobManager.getJob(
 
         req.params.jobId
 
     );
+
+
 
 
 
@@ -887,10 +1107,15 @@ app.get("/result/:jobId",(req,res)=>{
 
 
 
+
+
     res.json(job);
 
 
+
 });
+
+
 
 
 
@@ -911,7 +1136,9 @@ app.get("/reports",async(req,res)=>{
 
 
         const reports =
+
         await blockchain.getReports();
+
 
 
 
@@ -920,19 +1147,26 @@ app.get("/reports",async(req,res)=>{
 
             agent:"Sentinel AI",
 
+
             network:"X Layer Testnet",
 
+
             totalReports:
+
             reports.length,
+
 
 
             reports
 
 
+
         });
 
 
+
     }
+
 
 
     catch(error){
@@ -950,7 +1184,11 @@ app.get("/reports",async(req,res)=>{
     }
 
 
+
 });
+
+
+
 
 
 
@@ -971,9 +1209,12 @@ app.get("/verify/:hash",async(req,res)=>{
 
 
         const result =
+
         await blockchain.verifyReport(
 
+
             req.params.hash
+
 
         );
 
@@ -984,6 +1225,7 @@ app.get("/verify/:hash",async(req,res)=>{
 
 
     }
+
 
 
     catch(error){
@@ -1001,7 +1243,11 @@ app.get("/verify/:hash",async(req,res)=>{
     }
 
 
+
 });
+
+
+
 
 
 
@@ -1016,7 +1262,9 @@ app.get("/verify/:hash",async(req,res)=>{
 // =====================================
 
 const PORT =
+
 process.env.PORT || 3000;
+
 
 
 
