@@ -600,7 +600,7 @@ app.get("/service",(req,res)=>{
         "X Layer Testnet",
 
  
-        
+
 pricing:{
 
     type:
@@ -667,7 +667,96 @@ pricing:{
 
 
 
+// =====================================
+// OKX ASP Manifest
+// =====================================
 
+app.get("/asp/manifest",(req,res)=>{
+
+    res.json({
+
+        name:
+        "Sentinel AI Risk Intelligence",
+
+
+        type:
+        "A2MCP",
+
+
+        category:
+        "Crypto Risk Analysis",
+
+
+        description:
+        "AI-powered cryptocurrency risk intelligence service providing technical analysis, risk scoring, LLM reasoning and blockchain verified reports.",
+
+
+        developer:
+        "Sentinel AI",
+
+
+        version:
+        "1.0.0",
+
+
+        network:
+        "X Layer Testnet",
+
+
+        pricing:{
+
+            model:
+            "free",
+
+            amount:
+            0,
+
+            currency:
+            "USDC"
+
+        },
+
+
+        tools:[
+
+            "analyze_crypto_risk",
+
+            "get_analysis_result",
+
+            "verify_blockchain_proof"
+
+        ],
+
+
+        capabilities:[
+
+            "real-time-market-analysis",
+
+            "technical-indicators",
+
+            "AI-risk-assessment",
+
+            "blockchain-proof-verification"
+
+        ],
+
+
+        endpoints:{
+
+            info:
+            "/mcp/info",
+
+            tools:
+            "/mcp/tools",
+
+            execute:
+            "/mcp/call"
+
+        }
+
+    });
+
+});
 
 
 
@@ -1063,41 +1152,37 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
-        const apiKey =
+                // =====================================
+        // OKX ASP Free A2MCP Mode
+        // Public endpoint compatibility
+        // =====================================
 
+        const apiKey =
         req.headers["x-api-key"];
 
 
-
-
+        // Optional API key:
+        // - If provided, validate it
+        // - If absent, allow free MCP access
 
         if(
-
+            apiKey &&
             !identityManager.verifyApiKey(apiKey)
-
         ){
-
 
             return mcpError(
 
-
                 res,
-
 
                 tool || null,
 
-
                 "Invalid API key",
-
 
                 401
 
-
             );
 
-
         }
-
 
 
 
@@ -1339,6 +1424,189 @@ app.get("/agent",async(req,res)=>{
 
 
         });
+
+
+    }
+
+
+});
+// =====================================
+// Public Demo Endpoint
+// OKX ASP Showcase
+// =====================================
+app.post("/demo/analyze", async(req,res)=>{
+
+    const requestId =
+    crypto.randomUUID();
+
+
+    const jobId =
+    jobManager.createJob();
+
+
+
+    res.json({
+
+        service:
+        "Sentinel AI Risk Intelligence",
+
+
+        type:
+        "A2MCP Demo",
+
+
+        requestId,
+
+
+        jobId,
+
+
+        status:
+        "processing",
+
+
+        message:
+        "Demo BTC-USDT risk analysis started",
+
+
+        resultEndpoint:
+        `/result/${jobId}`
+
+    });
+
+
+
+    try{
+
+
+                const result =
+        await agent.analyze(
+
+            "Analyze BTC-USDT market risk for demonstration"
+
+        );
+
+
+
+        const reportData =
+        JSON.stringify(result);
+
+
+
+        const reportHash =
+        crypto
+
+        .createHash("sha256")
+
+        .update(reportData)
+
+        .digest("hex");
+
+
+
+        const asset =
+        result.asset ??
+        "BTC-USDT";
+
+
+
+        const riskScore =
+        result.risk?.score ??
+        0;
+
+
+
+        const decision =
+        result.risk?.level ??
+        "UNKNOWN";
+
+
+
+        const blockchainResult =
+        await blockchain.storeReport(
+
+            asset,
+
+            riskScore,
+
+            decision,
+
+            reportHash
+
+        );
+
+
+
+        const registryTransaction =
+        await registry.incrementSentinelReports();
+
+
+
+
+        jobManager.updateJob(
+
+            jobId,
+
+            {
+
+                demo:true,
+
+                service:
+                "Sentinel AI Risk Intelligence",
+
+
+                type:
+                "A2MCP Demo",
+
+
+                version:
+                "1.0.0",
+
+
+                ...result,
+
+
+                blockchain:{
+
+                    stored:true,
+
+
+                    reportHash,
+
+
+                    transaction:
+                    blockchainResult.transaction,
+
+
+                    registryTransaction,
+
+
+                    status:
+                    blockchainResult.status
+
+                }
+
+            }
+
+        ); 
+
+        } 
+
+    catch(error){
+
+
+        jobManager.updateJob(
+
+            jobId,
+
+            {
+
+                error:
+                error.message
+
+            }
+
+        );
 
 
     }
