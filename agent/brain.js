@@ -11,7 +11,6 @@ const {
     calculateATR
 } = require("../analysis/indicators");
 
-
 const RiskEngine = require("../risk/riskEngine");
 
 
@@ -31,12 +30,9 @@ class SentinelAgent {
         });
 
 
-        this.market =
-            new MarketAgent();
+        this.market = new MarketAgent();
 
-
-        this.risk =
-            new RiskEngine();
+        this.risk = new RiskEngine();
 
     }
 
@@ -73,7 +69,6 @@ class SentinelAgent {
 
 
 
-
             const indicators = {
 
 
@@ -82,36 +77,25 @@ class SentinelAgent {
 
 
                 SMA20:
-                    calculateSMA(
-                        closes
-                    ),
+                    calculateSMA(closes),
 
 
                 EMA20:
-                    calculateEMA(
-                        closes
-                    ),
+                    calculateEMA(closes),
 
 
                 RSI14:
-                    calculateRSI(
-                        closes
-                    ),
+                    calculateRSI(closes),
 
 
                 MACD:
-                    calculateMACD(
-                        closes
-                    ),
+                    calculateMACD(closes),
 
 
                 ATR:
-                    calculateATR(
-                        candles
-                    )
+                    calculateATR(candles)
 
             };
-
 
 
 
@@ -125,15 +109,100 @@ class SentinelAgent {
 
 
 
+            const facts = {
+
+
+                price_vs_sma20:
+
+                    indicators.price > indicators.SMA20
+
+                    ?
+
+                    "Price is ABOVE SMA20 (bullish)"
+
+                    :
+
+                    "Price is BELOW SMA20 (bearish)",
+
+
+
+                price_vs_ema20:
+
+                    indicators.price > indicators.EMA20
+
+                    ?
+
+                    "Price is ABOVE EMA20 (bullish)"
+
+                    :
+
+                    "Price is BELOW EMA20 (bearish)",
+
+
+
+                rsi_condition:
+
+                    indicators.RSI14 > 70
+
+                    ?
+
+                    "RSI is overbought"
+
+                    :
+
+                    indicators.RSI14 < 30
+
+                    ?
+
+                    "RSI is oversold"
+
+                    :
+
+                    "RSI is neutral",
+
+
+
+                macd_condition:
+
+                    indicators.MACD.macd >
+                    indicators.MACD.signal
+
+                    ?
+
+                    "MACD bullish momentum"
+
+                    :
+
+                    "MACD bearish momentum",
+
+
+
+                volatility:
+
+                    indicators.ATR > 500
+
+                    ?
+
+                    "High volatility"
+
+                    :
+
+                    "Controlled volatility"
+
+            };
+
+
+
+
+
             const prompt = `
 
 You are Sentinel AI, an autonomous Web3 crypto risk intelligence agent.
 
-Analyze the following market data.
+Analyze this market data.
 
 Asset:
 ${market.asset}
-
 
 Current Price:
 ${market.price}
@@ -157,6 +226,13 @@ ATR:
 ${indicators.ATR}
 
 
+
+Verified Market Facts:
+
+${JSON.stringify(facts,null,2)}
+
+
+
 Risk Engine:
 
 Risk Score:
@@ -167,12 +243,25 @@ ${risk.decision}
 
 
 Factors:
+
 ${risk.factors.join(", ")}
+
 
 
 User Request:
 
 ${input}
+
+
+
+Rules:
+
+- Verified Market Facts are the source of truth.
+- Never contradict indicator values.
+- Never invent numbers.
+- Explain the data only.
+- Keep the report concise.
+
 
 
 Generate a professional crypto risk report.
@@ -191,10 +280,29 @@ Include:
 
 
 
+            // ================================
+            // Ollama timeout protection
+            // ================================
+
+            const controller =
+                new AbortController();
+
+
+            const timeout =
+                setTimeout(
+                    () => controller.abort(),
+                    180000
+                );
+
+
+
+
             const response =
                 await this.client.chat({
 
+
                     model:this.model,
+
 
                     messages:[
 
@@ -203,9 +311,29 @@ Include:
                             content:prompt
                         }
 
-                    ]
+                    ],
+
+
+                    options:{
+
+
+                        temperature:0.2,
+
+
+                        num_predict:800
+
+                    },
+
+
+                    signal:
+                        controller.signal
 
                 });
+
+
+
+            clearTimeout(timeout);
+
 
 
 
@@ -247,7 +375,6 @@ Include:
                     status:
                         market.marketStatus
 
-
                 },
 
 
@@ -278,8 +405,6 @@ Include:
 
 
 
-
-
                 technical:{
 
 
@@ -299,7 +424,9 @@ Include:
                     macd:
 
                         indicators.MACD
+
                         ?
+
                         {
 
                             value:
@@ -316,16 +443,16 @@ Include:
 
                             trend:
 
-                            indicators.MACD.macd >
-                            indicators.MACD.signal
+                                indicators.MACD.macd >
+                                indicators.MACD.signal
 
-                            ?
+                                ?
 
-                            "BULLISH"
+                                "BULLISH"
 
-                            :
+                                :
 
-                            "BEARISH"
+                                "BEARISH"
 
                         }
 
@@ -337,7 +464,6 @@ Include:
 
                     atr:
                         indicators.ATR
-
 
                 },
 
@@ -359,7 +485,6 @@ Include:
                     factors:
                         risk.factors
 
-
                 },
 
 
@@ -376,7 +501,28 @@ Include:
 
 
         }
+
         catch(error){
+
+
+
+            if(error.name === "AbortError"){
+
+                return {
+
+                    agent:this.name,
+
+                    version:this.version,
+
+                    status:"error",
+
+                    error:
+                    "Ollama response timeout after 180 seconds"
+
+                };
+
+            }
+
 
 
             return {
