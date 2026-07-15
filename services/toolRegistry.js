@@ -6,7 +6,7 @@ const tools = {};
 
 function registerTool(name, description, inputSchema, handler){
 
-    tools[name]={
+    tools[name] = {
 
         name,
 
@@ -24,17 +24,17 @@ function registerTool(name, description, inputSchema, handler){
 
 function getTools(){
 
-    return Object.values(tools).map(tool=>({
+    return Object.values(tools).map(tool => ({
 
-        name:tool.name,
+        name: tool.name,
 
-        description:tool.description,
+        description: tool.description,
 
-        method:"POST",
+        method: "POST",
 
-        endpoint:"/mcp/call",
+        endpoint: "/mcp/call",
 
-        inputSchema:tool.inputSchema
+        inputSchema: tool.inputSchema
 
     }));
 
@@ -42,11 +42,10 @@ function getTools(){
 
 
 
-async function executeTool(name,args){
+async function executeTool(name, args){
 
 
-    const tool =
-    tools[name];
+    const tool = tools[name];
 
 
     if(!tool){
@@ -213,6 +212,7 @@ async(args)=>{
 
 
 
+
 // ==================================
 // Verify Blockchain Proof
 // ==================================
@@ -256,7 +256,93 @@ async(args)=>{
 
 
 
-module.exports={
+
+
+// ==================================
+// OKX Market Data Tool
+// ==================================
+
+registerTool(
+
+"okx_market_ticker",
+
+"Get live crypto market price from OKX demo environment.",
+
+{
+    symbol:"string"
+},
+
+
+async(args)=>{
+
+
+    const OKXClient =
+    require("./okxClient");
+
+
+    const okx =
+    new OKXClient();
+
+
+
+    return await okx.getTicker(
+
+        args.symbol || "BTC-USDT"
+
+    );
+
+
+}
+
+
+);
+
+
+
+
+
+
+
+// ==================================
+// OKX Account Balance Tool
+// ==================================
+
+registerTool(
+
+"okx_balance",
+
+"Get Sentinel AI OKX demo trading account balance.",
+
+{},
+
+
+async()=>{
+
+
+    const OKXClient =
+    require("./okxClient");
+
+
+    const okx =
+    new OKXClient();
+
+
+
+    return await okx.getBalance();
+
+
+}
+
+
+);
+
+
+
+
+
+
+
+module.exports = {
 
     registerTool,
 

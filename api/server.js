@@ -14,6 +14,7 @@ const identityManager = require("../services/identityManager");
 
 const app = express();
 
+
 app.use(cors());
 app.use(express.json());
 
@@ -29,11 +30,8 @@ const registry = RegistryAgent;
 
 
 
-
-
 // =====================================
 // MCP Response Helpers
-// Milestone 25.4
 // =====================================
 
 function mcpSuccess(res, tool, data){
@@ -42,9 +40,16 @@ function mcpSuccess(res, tool, data){
 
         success:true,
 
+        service:
+        "Sentinel AI Risk Intelligence",
+
+        type:
+        "A2MCP",
+
         tool,
 
-        timestamp:new Date().toISOString(),
+        timestamp:
+        new Date().toISOString(),
 
         data
 
@@ -60,9 +65,13 @@ function mcpError(res, tool, error, code=500){
 
         success:false,
 
+        service:
+        "Sentinel AI Risk Intelligence",
+
         tool,
 
-        timestamp:new Date().toISOString(),
+        timestamp:
+        new Date().toISOString(),
 
         error
 
@@ -75,9 +84,9 @@ function mcpError(res, tool, error, code=500){
 
 
 
+
 // =====================================
-// Real MCP Tool Registry
-// Milestone 25.5
+// MCP Tool Registry
 // =====================================
 
 
@@ -88,29 +97,38 @@ const toolRegistry = {
 
 
         description:
+
         "Analyze cryptocurrency market risk using AI reasoning, technical indicators and blockchain verified proof storage.",
+
 
 
         inputSchema:{
 
+
             request:"string"
 
+
         },
+
 
 
         async execute(args){
 
 
             const jobId =
+
             jobManager.createJob();
+
 
 
 
             agent.analyze(
 
+
                 args.request ||
 
                 "Analyze crypto risk"
+
 
             )
 
@@ -118,67 +136,106 @@ const toolRegistry = {
 
 
                 const reportData =
+
                 JSON.stringify(result);
 
 
 
+
                 const reportHash =
+
                 crypto
+
                 .createHash("sha256")
+
                 .update(reportData)
+
                 .digest("hex");
 
 
 
+
                 const asset =
+
                 result.asset ??
 
                 "BTC-USDT";
 
 
 
+
                 const riskScore =
+
                 result.risk?.score ??
 
                 0;
 
 
 
+
                 const decision =
+
                 result.risk?.level ??
 
                 "UNKNOWN";
 
 
 
+
                 const blockchainResult =
+
                 await blockchain.storeReport(
+
 
                     asset,
 
+
                     riskScore,
+
 
                     decision,
 
+
                     reportHash
+
 
                 );
 
 
 
+
+
                 const registryTransaction =
+
                 await registry.incrementSentinelReports();
+
+
 
 
 
                 jobManager.updateJob(
 
+
                     jobId,
+
 
                     {
 
 
+                        service:
+
+                        "Sentinel AI Risk Intelligence",
+
+
+
+                        version:
+
+                        "1.0.0",
+
+
+
                         ...result,
+
 
 
                         blockchain:{
@@ -190,26 +247,35 @@ const toolRegistry = {
                             reportHash,
 
 
+
                             transaction:
+
                             blockchainResult.transaction,
+
 
 
                             registryTransaction,
 
 
+
                             status:
+
                             blockchainResult.status
 
 
                         }
 
 
+
                     }
+
 
                 );
 
 
+
             })
+
 
 
             .catch(error=>{
@@ -217,13 +283,18 @@ const toolRegistry = {
 
                 jobManager.updateJob(
 
+
                     jobId,
+
 
                     {
 
+
                         error:error.message
 
+
                     }
+
 
                 );
 
@@ -232,13 +303,19 @@ const toolRegistry = {
 
 
 
+
+
             return {
 
 
-                status:"processing",
+                status:
+
+                "processing",
+
 
 
                 jobId,
+
 
 
                 resultEndpoint:
@@ -259,7 +336,6 @@ const toolRegistry = {
 
 
 
-
     get_analysis_result:{
 
 
@@ -271,7 +347,9 @@ const toolRegistry = {
 
         inputSchema:{
 
+
             jobId:"string"
+
 
         },
 
@@ -292,11 +370,13 @@ const toolRegistry = {
 
             if(!job){
 
+
                 throw new Error(
 
                     "Job not found"
 
                 );
+
 
             }
 
@@ -314,8 +394,6 @@ const toolRegistry = {
 
 
 
-
-
     verify_blockchain_proof:{
 
 
@@ -327,7 +405,9 @@ const toolRegistry = {
 
         inputSchema:{
 
+
             hash:"string"
+
 
         },
 
@@ -356,9 +436,8 @@ const toolRegistry = {
 
 
 
-
 // =====================================
-// Basic Service Status
+// Root Service
 // =====================================
 
 app.get("/",(req,res)=>{
@@ -367,22 +446,45 @@ app.get("/",(req,res)=>{
     res.json({
 
 
-        project:"Sentinel AI X Layer",
+        project:
 
-        status:"running",
+        "Sentinel AI X Layer",
 
-        agent:agent.name,
 
-        version:agent.version,
 
-        network:"X Layer Testnet"
+        service:
+
+        "Sentinel AI Risk Intelligence",
+
+
+
+        status:
+
+        "running",
+
+
+
+        type:
+
+        "A2MCP",
+
+
+
+        version:
+
+        "1.0.0",
+
+
+
+        network:
+
+        "X Layer Testnet"
 
 
     });
 
 
 });
-
 
 
 
@@ -398,29 +500,45 @@ app.get("/health",(req,res)=>{
     res.json({
 
 
-        service:"Sentinel AI",
+        service:
 
-        status:"online",
+        "Sentinel AI Risk Intelligence",
 
-        type:"A2MCP",
 
-        network:"X Layer Testnet",
 
-        version:agent.version,
+        status:
 
-        timestamp:new Date().toISOString()
+        "online",
+
+
+
+        type:
+
+        "A2MCP",
+
+
+
+        version:
+
+        "1.0.0",
+
+
+
+        network:
+
+        "X Layer Testnet",
+
+
+
+        timestamp:
+
+        new Date().toISOString()
 
 
     });
 
 
 });
-
-
-
-
-
-
 // =====================================
 // Service Description
 // =====================================
@@ -431,48 +549,112 @@ app.get("/service",(req,res)=>{
     res.json({
 
 
-        name:"Sentinel AI Risk Intelligence API",
+        name:
 
-        type:"A2MCP",
+        "Sentinel AI Risk Intelligence API",
+
+
+
+        type:
+
+        "A2MCP",
+
+
+
+        version:
+
+        "1.0.0",
+
 
 
         description:
 
-        "Autonomous crypto risk analysis service with AI reasoning, technical indicators and blockchain verified proofs.",
+        "Autonomous crypto risk intelligence service providing AI analysis, technical indicators, risk scoring and blockchain verified proofs.",
+
 
 
         capabilities:[
 
+
             "crypto-market-analysis",
+
 
             "risk-scoring",
 
+
             "technical-analysis",
+
 
             "AI-report-generation",
 
+
             "blockchain-proof-verification"
+
 
         ],
 
 
-        network:"X Layer Testnet",
+
+        network:
+
+        "X Layer Testnet",
+
+ 
+        
+pricing:{
+
+    type:
+    "free",
+
+    amount:
+    0,
+
+    currency:
+    "USDC",
+
+    description:
+    "Free AI risk analysis service"
+
+},
+
 
 
         endpoints:{
 
 
-            analyze:"POST /analyze",
+            analyze:
 
-            result:"GET /result/:jobId",
+            "POST /analyze",
 
-            identity:"GET /identity",
 
-            mcpInfo:"GET /mcp/info",
 
-            mcpTools:"GET /mcp/tools",
+            result:
 
-            mcpCall:"POST /mcp/call"
+            "GET /result/:jobId",
+
+
+
+            identity:
+
+            "GET /identity",
+
+
+
+            mcpInfo:
+
+            "GET /mcp/info",
+
+
+
+            mcpTools:
+
+            "GET /mcp/tools",
+
+
+
+            mcpCall:
+
+            "POST /mcp/call"
 
 
         }
@@ -488,33 +670,200 @@ app.get("/service",(req,res)=>{
 
 
 
-// ===============================
-// PART 1 END
-// CONTINUE PART 2 BELOW
-// ===============================// =====================================
-// A2MCP Discovery Information
+
+
+// =====================================
+// A2MCP Discovery
+// =====================================
+// =====================================
+// MCP Health Check
+// OKX.AI ASP Compatibility
 // =====================================
 
+app.get("/mcp/health",(req,res)=>{
+
+    res.json({
+
+        service:
+        "Sentinel AI Risk Intelligence",
+
+        type:
+        "A2MCP",
+
+        status:
+        "online",
+
+        mcp:
+        "ready",
+
+        network:
+        "X Layer Testnet",
+
+        timestamp:
+        new Date().toISOString()
+
+    });
+
+});// =====================================
+// MCP Usage Examples
+// OKX.AI ASP Discovery
+// =====================================
+
+app.get("/mcp/examples",(req,res)=>{
+
+    res.json({
+
+        service:
+        "Sentinel AI Risk Intelligence",
+
+        examples:[
+
+            {
+
+                name:
+                "Analyze crypto risk",
+
+                method:
+                "POST",
+
+                endpoint:
+                "/mcp/call",
+
+                request:{
+
+                    tool:
+                    "analyze_crypto_risk",
+
+                    arguments:{
+
+                        request:
+                        "Analyze BTC-USDT market risk"
+
+                    }
+
+                }
+
+            },
+
+            {
+
+                name:
+                "Retrieve analysis result",
+
+                method:
+                "POST",
+
+                endpoint:
+                "/mcp/call",
+
+                request:{
+
+                    tool:
+                    "get_analysis_result",
+
+                    arguments:{
+
+                        jobId:
+                        "sentinel-job-id"
+
+                    }
+
+                }
+
+            },
+
+            {
+
+                name:
+                "Verify blockchain proof",
+
+                method:
+                "POST",
+
+                endpoint:
+                "/mcp/call",
+
+                request:{
+
+                    tool:
+                    "verify_blockchain_proof",
+
+                    arguments:{
+
+                        hash:
+                        "report-hash"
+
+                    }
+
+                }
+
+            }
+
+        ]
+
+    });
+
+});
 app.get("/mcp/info",(req,res)=>{
 
 
     res.json({
 
 
-        name:"Sentinel AI Risk Intelligence",
+        name:
 
-        type:"A2MCP",
+        "Sentinel AI Risk Intelligence",
 
-        version:"1.0.0",
+
+
+        type:
+
+        "A2MCP",
+
+
+
+        version:
+
+        "1.0.0",
+
 
 
         description:
-        "Autonomous crypto risk analysis agent with AI reasoning and blockchain verified proofs.",
+
+        "AI-powered cryptocurrency risk analysis service providing real-time market intelligence, technical indicators, LLM-based reasoning, and blockchain-verifiable risk reports.",
 
 
-        network:"X Layer Testnet",
 
-        status:"online",
+        network:
+
+        "X Layer Testnet",
+
+
+
+        status:
+
+        "online",pricing:{
+
+    type:
+    "free",
+
+    amount:
+    0,
+
+    currency:
+    "USDC",
+
+    description:
+    "Free AI risk analysis service"
+
+},
+
+
+
+        identityEndpoint:
+
+        "/identity",
+
 
 
         capabilities:[
@@ -522,19 +871,20 @@ app.get("/mcp/info",(req,res)=>{
 
             "crypto-market-analysis",
 
+
             "risk-scoring",
+
 
             "technical-analysis",
 
+
             "AI-report-generation",
+
 
             "blockchain-proof-verification"
 
 
-        ],
-
-
-        identityEndpoint:"/identity"
+        ]
 
 
     });
@@ -548,8 +898,9 @@ app.get("/mcp/info",(req,res)=>{
 
 
 
+
 // =====================================
-// Identity Endpoint
+// Agent Identity
 // Milestone 26.1
 // =====================================
 
@@ -566,8 +917,8 @@ app.get("/identity",(req,res)=>{
 
 
             identity:
-            identityManager.getIdentity()
 
+            identityManager.getIdentity()
 
 
         });
@@ -583,6 +934,7 @@ app.get("/identity",(req,res)=>{
 
 
             success:false,
+
 
             error:error.message
 
@@ -604,8 +956,7 @@ app.get("/identity",(req,res)=>{
 
 
 // =====================================
-// MCP Tools Discovery
-// Milestone 25.5
+// MCP Tool Discovery
 // =====================================
 
 app.get("/mcp/tools",(req,res)=>{
@@ -614,33 +965,63 @@ app.get("/mcp/tools",(req,res)=>{
     res.json({
 
 
-        agent:"Sentinel AI Risk Intelligence",
+        agent:
 
-        type:"A2MCP",
-
-        version:"1.0.0",
+        "Sentinel AI Risk Intelligence",
 
 
-        tools:Object.entries(toolRegistry)
+
+        type:
+
+        "A2MCP",
+
+
+
+        version:
+
+        "1.0.0",
+
+
+
+        tools:
+
+
+        Object.entries(toolRegistry)
+
         .map(([name,tool])=>({
+
 
 
             name,
 
+
+
             description:
+
             tool.description,
 
 
-            method:"POST",
 
-            endpoint:"/mcp/call",
+            method:
+
+            "POST",
+
+
+
+            endpoint:
+
+            "/mcp/call",
+
 
 
             inputSchema:
+
             tool.inputSchema
 
 
+
         }))
+
 
 
     });
@@ -655,10 +1036,9 @@ app.get("/mcp/tools",(req,res)=>{
 
 
 
-
 // =====================================
-// MCP Tool Execution Router
-// Milestone 25.4 + 25.5 + 26.2
+// MCP Execution Router
+// API Key + Permission Security
 // =====================================
 
 app.post("/mcp/call",async(req,res)=>{
@@ -678,36 +1058,40 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
+
     try{
 
 
 
-        // =============================
-        // API KEY VERIFICATION
-        // Milestone 26.2
-        // =============================
-
-
         const apiKey =
+
         req.headers["x-api-key"];
 
 
 
 
+
         if(
+
             !identityManager.verifyApiKey(apiKey)
+
         ){
 
 
             return mcpError(
 
+
                 res,
+
 
                 tool || null,
 
+
                 "Invalid API key",
 
+
                 401
+
 
             );
 
@@ -717,10 +1101,6 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
-
-        // =============================
-        // TOOL NAME CHECK
-        // =============================
 
 
         if(!tool){
@@ -728,13 +1108,18 @@ app.post("/mcp/call",async(req,res)=>{
 
             return mcpError(
 
+
                 res,
+
 
                 null,
 
+
                 "Tool name required",
 
+
                 400
+
 
             );
 
@@ -746,26 +1131,28 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
-        // =============================
-        // PERMISSION CHECK
-        // Milestone 26.2
-        // =============================
-
 
         if(
+
             !identityManager.hasPermission(tool)
+
         ){
 
 
             return mcpError(
 
+
                 res,
+
 
                 tool,
 
+
                 "Permission denied",
 
+
                 403
+
 
             );
 
@@ -777,12 +1164,9 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
-        // =============================
-        // TOOL LOOKUP
-        // =============================
-
 
         const selectedTool =
+
         toolRegistry[tool];
 
 
@@ -794,13 +1178,18 @@ app.post("/mcp/call",async(req,res)=>{
 
             return mcpError(
 
+
                 res,
+
 
                 tool,
 
+
                 "Unknown MCP tool",
 
+
                 404
+
 
             );
 
@@ -812,27 +1201,28 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
-        // =============================
-        // EXECUTE TOOL
-        // =============================
-
 
         const result =
+
         await selectedTool.execute(args);
+
 
 
 
 
         return mcpSuccess(
 
+
             res,
+
 
             tool,
 
+
             result
 
-        );
 
+        );
 
 
 
@@ -844,11 +1234,15 @@ app.post("/mcp/call",async(req,res)=>{
 
         return mcpError(
 
+
             res,
+
 
             tool,
 
+
             error.message
+
 
         );
 
@@ -863,11 +1257,10 @@ app.post("/mcp/call",async(req,res)=>{
 
 
 
-// ===============================
-// PART 2 END
-// CONTINUE PART 3 BELOW
-// ===============================// =====================================
-// On-chain AI Agent Identity
+
+
+// =====================================
+// On-chain Agent Identity
 // =====================================
 
 app.get("/agent",async(req,res)=>{
@@ -877,32 +1270,56 @@ app.get("/agent",async(req,res)=>{
 
 
         const agentData =
+
         await registry.getAgent(1);
+
 
 
 
         res.json({
 
 
-            agentId:Number(agentData.agentId),
+
+            agentId:
+
+            Number(agentData.agentId),
 
 
-            owner:agentData.owner,
+
+            owner:
+
+            agentData.owner,
 
 
-            name:agentData.name,
+
+            name:
+
+            agentData.name,
 
 
-            capabilities:agentData.capabilities,
+
+            capabilities:
+
+            agentData.capabilities,
 
 
-            createdAt:Number(agentData.createdAt),
+
+            createdAt:
+
+            Number(agentData.createdAt),
 
 
-            reportsGenerated:Number(agentData.reportsGenerated),
+
+            reportsGenerated:
+
+            Number(agentData.reportsGenerated),
 
 
-            active:agentData.active
+
+            active:
+
+            agentData.active
+
 
 
         });
@@ -915,13 +1332,11 @@ app.get("/agent",async(req,res)=>{
     catch(error){
 
 
-        console.log(error);
-
-
-
         res.status(500).json({
 
+
             error:error.message
+
 
         });
 
@@ -930,41 +1345,87 @@ app.get("/agent",async(req,res)=>{
 
 
 });
-
-
-
-
-
-
-
-
-
 // =====================================
 // Direct AI Analysis Endpoint
+// OKX.AI A2MCP Ready
 // =====================================
 
 app.post("/analyze",async(req,res)=>{
 
 
+    const requestId =
+
+    crypto.randomUUID();
+
+
+
+
+    const startedAt =
+
+    new Date().toISOString();
+
+
+
+
     const jobId =
+
     jobManager.createJob();
 
 
 
+
+
+    // Immediate A2MCP response
+
     res.json({
+
+
+        service:
+
+        "Sentinel AI Risk Intelligence",
+
+
+
+        type:
+
+        "A2MCP",
+
+
+
+        version:
+
+        "1.0.0",
+
+
+
+        requestId,
+
+
+
+        timestamp:
+
+        startedAt,
+
 
 
         jobId,
 
 
-        status:"processing",
+
+        status:
+
+        "processing",
+
 
 
         message:
+
         "Sentinel AI analysis started",
 
 
+
         resultEndpoint:
+
         `/result/${jobId}`
 
 
@@ -973,13 +1434,19 @@ app.post("/analyze",async(req,res)=>{
 
 
 
+
     try{
 
 
         const result =
+
         await agent.analyze(
 
-            req.body.request
+
+            req.body.request ||
+
+            "Analyze crypto risk"
+
 
         );
 
@@ -988,6 +1455,7 @@ app.post("/analyze",async(req,res)=>{
 
 
         const reportData =
+
         JSON.stringify(result);
 
 
@@ -995,6 +1463,7 @@ app.post("/analyze",async(req,res)=>{
 
 
         const reportHash =
+
         crypto
 
         .createHash("sha256")
@@ -1007,6 +1476,8 @@ app.post("/analyze",async(req,res)=>{
 
 
 
+
+
         jobManager.updateJob(
 
 
@@ -1016,12 +1487,43 @@ app.post("/analyze",async(req,res)=>{
             {
 
 
+                service:
+
+                "Sentinel AI Risk Intelligence",
+
+
+
+                type:
+
+                "A2MCP",
+
+
+
+                version:
+
+                "1.0.0",
+
+
+
+                requestId,
+
+
+
+                timestamp:
+
+                startedAt,
+
+
+
                 ...result,
+
 
 
                 blockchainProof:
 
+
                 reportHash
+
 
 
             }
@@ -1034,8 +1536,8 @@ app.post("/analyze",async(req,res)=>{
     }
 
 
-
     catch(error){
+
 
 
         jobManager.updateJob(
@@ -1047,7 +1549,14 @@ app.post("/analyze",async(req,res)=>{
             {
 
 
-                error:error.message
+                requestId,
+
+
+
+                error:
+
+                error.message
+
 
 
             }
@@ -1070,10 +1579,8 @@ app.post("/analyze",async(req,res)=>{
 
 
 
-
-
 // =====================================
-// Get Async Result
+// Get Analysis Result
 // =====================================
 
 app.get("/result/:jobId",(req,res)=>{
@@ -1097,7 +1604,12 @@ app.get("/result/:jobId",(req,res)=>{
         return res.status(404).json({
 
 
-            error:"Job not found"
+            success:false,
+
+
+            error:
+
+            "Job not found"
 
 
         });
@@ -1109,7 +1621,33 @@ app.get("/result/:jobId",(req,res)=>{
 
 
 
-    res.json(job);
+
+    res.json({
+
+
+        success:true,
+
+
+
+        service:
+
+        "Sentinel AI Risk Intelligence",
+
+
+
+        type:
+
+        "A2MCP",
+
+
+
+        result:
+
+        job
+
+
+
+    });
 
 
 
@@ -1123,10 +1661,8 @@ app.get("/result/:jobId",(req,res)=>{
 
 
 
-
-
 // =====================================
-// Get All AI Proof Reports
+// Blockchain Reports
 // =====================================
 
 app.get("/reports",async(req,res)=>{
@@ -1145,10 +1681,17 @@ app.get("/reports",async(req,res)=>{
         res.json({
 
 
-            agent:"Sentinel AI",
+
+            service:
+
+            "Sentinel AI Risk Intelligence",
 
 
-            network:"X Layer Testnet",
+
+            network:
+
+            "X Layer Testnet",
+
 
 
             totalReports:
@@ -1168,14 +1711,15 @@ app.get("/reports",async(req,res)=>{
     }
 
 
-
     catch(error){
 
 
         res.status(500).json({
 
 
-            error:error.message
+            error:
+
+            error.message
 
 
         });
@@ -1186,9 +1730,6 @@ app.get("/reports",async(req,res)=>{
 
 
 });
-
-
-
 
 
 
@@ -1220,21 +1761,46 @@ app.get("/verify/:hash",async(req,res)=>{
 
 
 
-        res.json(result);
+
+
+        res.json({
+
+
+            service:
+
+            "Sentinel AI Risk Intelligence",
+
+
+
+            verified:true,
+
+
+
+            result
+
+
+
+        });
 
 
 
     }
 
 
-
     catch(error){
+
 
 
         res.status(500).json({
 
 
-            error:error.message
+            verified:false,
+
+
+            error:
+
+            error.message
+
 
 
         });
@@ -1254,9 +1820,6 @@ app.get("/verify/:hash",async(req,res)=>{
 
 
 
-
-
-
 // =====================================
 // Start Server
 // =====================================
@@ -1264,6 +1827,7 @@ app.get("/verify/:hash",async(req,res)=>{
 const PORT =
 
 process.env.PORT || 3000;
+
 
 
 
