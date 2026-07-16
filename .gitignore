@@ -2,3 +2,7 @@
 node_modules/
 services/jobs.json
 api/server.backup.js
+# Local backups
+backup/
+# Local assets
+assets/
