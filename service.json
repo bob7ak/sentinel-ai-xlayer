@@ -1,0 +1,9 @@
+[
+  {
+    "serviceName": "Sentinel AI Risk Analysis",
+    "serviceDescription": "AI-powered crypto risk intelligence, market analysis and blockchain verified reports.",
+    "serviceType": "A2MCP",
+    "fee": 0,
+    "endpoint": "https://inexpensive-investors-translated-bids.trycloudflare.com/mcp/call"
+  }
+]
