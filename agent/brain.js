@@ -46,19 +46,30 @@ class SentinelAgent {
         try{
 
 
-            const market =
-                await this.market.analyzeAsset(
-                    "BTC-USDT"
-                );
+           const { extractSymbol } =
+    require("../utils/symbolParser");
 
+const symbol =
+    extractSymbol(
+        typeof input === "string"
+        ? { request: input }
+        : input
+    );
 
+if (!symbol)
+    throw new Error("No trading symbol found.");
 
-            const candles =
-                await getCandles(
-                    "BTC-USDT",
-                    "1H",
-                    100
-                );
+const market =
+    await this.market.analyzeAsset(
+        symbol
+    );
+
+const candles =
+    await getCandles(
+        symbol,
+        "1H",
+        100
+    );
 
 
 

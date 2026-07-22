@@ -14,10 +14,62 @@ const identityManager = require("../services/identityManager");
 
 const app = express();
 
+// =====================================
+// x402 Payment Challenge
+// OKX ASP Validation
+// =====================================
 
+function x402PaymentRequired(req,res,next){
+
+    const payment =
+    req.headers["x-payment"];
+
+
+    // No payment proof -> return standard 402
+
+    if(!payment){
+
+        return res.status(402).json({
+
+            error:
+            "Payment Required",
+
+            accepts:[
+
+                {
+
+                    scheme:
+                    "exact",
+
+                    network:
+                    "eip155:1952",
+
+                    amount:
+                    "10000",
+
+                    asset:
+                    process.env.X402_ASSET_ADDRESS,
+
+                    receiver:
+                    process.env.PAYMENT_RECEIVER
+
+                }
+
+            ]
+
+        });
+
+    }
+
+
+    // Payment header exists
+    // continue to MCP
+
+    next();
+
+}
 app.use(cors());
 app.use(express.json());
-
 
 
 const agent = new SentinelAgent();
@@ -25,8 +77,6 @@ const agent = new SentinelAgent();
 const blockchain = new ContractAgent();
 
 const registry = RegistryAgent;
-
-
 
 
 
@@ -122,15 +172,16 @@ const toolRegistry = {
 
 
 
-            agent.analyze(
+           agent.analyze({
 
+    request:
+        args.request ||
+        "",
 
-                args.request ||
+    symbol:
+        args.symbol
 
-                "Analyze crypto risk"
-
-
-            )
+})
 
             .then(async(result)=>{
 
@@ -597,23 +648,31 @@ app.get("/service",(req,res)=>{
 
         network:
 
-        "X Layer Testnet",
+"X Layer Testnet",
 
- 
 
 pricing:{
 
     type:
-    "free",
+    "x402",
+
+    model:
+    "exact",
 
     amount:
-    0,
+    "10000",
 
     currency:
     "USDC",
 
+    asset:
+    process.env.X402_ASSET_ADDRESS,
+
+    network:
+    "eip155:1952",
+
     description:
-    "Free AI risk analysis service"
+    "AI risk analysis protected by x402 payment protocol"
 
 },
 
@@ -678,44 +737,45 @@ app.get("/asp/manifest",(req,res)=>{
         name:
         "Sentinel AI Risk Intelligence",
 
-
         type:
         "A2MCP",
-
 
         category:
         "Crypto Risk Analysis",
 
-
         description:
         "AI-powered cryptocurrency risk intelligence service providing technical analysis, risk scoring, LLM reasoning and blockchain verified reports.",
-
 
         developer:
         "Sentinel AI",
 
-
         version:
         "1.0.0",
-
 
         network:
         "X Layer Testnet",
 
-
         pricing:{
 
             model:
-            "free",
+            "x402",
+
+            scheme:
+            "exact",
 
             amount:
-            0,
+            "10000",
 
             currency:
-            "USDC"
+            "USDC",
+
+            asset:
+            process.env.X402_ASSET_ADDRESS,
+
+            network:
+            "eip155:1952"
 
         },
-
 
         tools:[
 
@@ -726,7 +786,6 @@ app.get("/asp/manifest",(req,res)=>{
             "verify_blockchain_proof"
 
         ],
-
 
         capabilities:[
 
@@ -739,7 +798,6 @@ app.get("/asp/manifest",(req,res)=>{
             "blockchain-proof-verification"
 
         ],
-
 
         endpoints:{
 
@@ -934,19 +992,27 @@ app.get("/mcp/info",(req,res)=>{
         "online",pricing:{
 
     type:
-    "free",
+    "x402",
+
+    model:
+    "exact",
 
     amount:
-    0,
+    "10000",
 
     currency:
     "USDC",
 
+    asset:
+    process.env.X402_ASSET_ADDRESS,
+
+    network:
+    "eip155:1952",
+
     description:
-    "Free AI risk analysis service"
+    "AI risk analysis protected by x402 payment protocol"
 
 },
-
 
 
         identityEndpoint:
@@ -1130,7 +1196,10 @@ app.get("/mcp/tools",(req,res)=>{
 // API Key + Permission Security
 // =====================================
 
-app.post("/mcp/call",async(req,res)=>{
+app.post(
+"/mcp/call",
+x402PaymentRequired,
+async(req,res)=>{
 
 
     const {

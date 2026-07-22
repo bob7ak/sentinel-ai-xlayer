@@ -3,9 +3,19 @@ const { getCandles } = require("./market/candles");
 
 async function test(){
 
-    const candles = await getCandles();
+    const symbol =
+        process.argv[2] || "BTC-USDT";
 
-    console.log(candles.slice(0,3));
+
+    const candles =
+        await getCandles(symbol);
+
+
+    console.log("Symbol:", symbol);
+
+    console.log(
+        candles.slice(0,3)
+    );
 
 }
 

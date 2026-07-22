@@ -19,6 +19,9 @@
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
+    "@x402/evm": "^2.19.0",
+    "@x402/express": "^2.19.0",
+    "@x402/mcp": "^2.19.0",
     "axios": "^1.18.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
